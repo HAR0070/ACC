@@ -12,7 +12,7 @@ import math
 #
 ###############
 
-
+plt.ion()
 
 # delta = steering angle
 
@@ -31,7 +31,7 @@ def traj_1(state, delta, T, PLOT= True):
         state = trajectory[-1]
         x,y,theta = bicycle_model(state,delta, v, L, dt)
         #print(x,y,theta)
-        trajectory.append([x,y,theta])
+        trajectory.append([round(x,2),round(y,2),theta])
 
     trajectory = np.array(trajectory)
     # Plot the trajectory
@@ -41,7 +41,8 @@ def traj_1(state, delta, T, PLOT= True):
         plt.ylabel('y (m)')
         plt.title('Trajectory of Kinematic Bicycle Model')
         plt.show()
-    return trajectory[-1]
+        plt.pause(0.1)
+    return trajectory
 
 ## take gps coordinates as input and do spline fitting
 def func(x,a,c,g):
@@ -63,9 +64,10 @@ def generate_centre_l(df):
 def cost(current, neighbor):
     def max_distance():
         trajectory = traj_1(current, 0, 0.5, False)
+        trajectory = trajectory[-1]
         # since it will be a straight line along x axis
         d = np.sqrt((current[0] - trajectory[0])**2 + (current[1] - trajectory[1])**2)
-        if d > 0:
+        if d > 0 :
             return d
         else:
             return 10
@@ -80,8 +82,8 @@ def cost(current, neighbor):
     #norm_d = (d - 0)/(maxd - 0)
     #norm_theta = (dtheta - 0)/(10 - 0)
     cost = d #np.sqrt(norm_d**2 + norm_theta**2)
-    print("this is cost", cost)
-    return cost
+    #print("this is cost", round(cost,3))
+    return round(cost,3)
 
 def cost2(neighbor):
     x0 , y0 = neighbor[0:2]
@@ -107,13 +109,13 @@ def cost2(neighbor):
     h = np.sqrt((x1 - x0)**2 + (y1-y0)**2)
     h = (h - 0)/(3 - 0)
     print("this is huristic", h)
-    return h
+    return round(h,3)
 
 def heuristic(neighbor, v, Th , start, df):
     x = neighbor[0]
     y = neighbor[1]
     xg , yg = set_goal(v, Th, start , df)
-    return np.sqrt((x - xg)**2 + (y-yg)**2)
+    return round(np.sqrt((x - xg)**2 + (y-yg)**2),3)
 
 def set_goal(v, Th , start, df):
     Th = 2  ######################################################################################################
@@ -157,8 +159,8 @@ def set_goal(v, Th , start, df):
         i += 1
 
     goal = [df.iloc[i,0] , df.iloc[i,1]]
-    print(" this is set goal", [30,1])
-    return 30 , 30
+    #print(" this is set goal", [30,1])
+    return 15,0
 
 
 def is_goal(state, resolution, v, Th , start, df):
@@ -187,10 +189,17 @@ def astar(start, resolution): # for now leave obstacle
     b = 0
 
     while open_set and b < 1000:
+        score_ = []
         b += 1
         open_set.sort(key=lambda x: x[0])
-        current = open_set.pop()
-        print(current[0])
+        if b == 1000:
+            for i in range(len(open_set)):
+                plt.scatter(open_set[i][1][0],open_set[i][1][1])
+                plt.show()
+            plt.pause(5)
+        # plt.clf()
+        current = open_set.pop(0)
+        # print(current[0])
         parent = current[2]
         state = current[1]
         ###########
@@ -198,16 +207,18 @@ def astar(start, resolution): # for now leave obstacle
         if is_goal(state, resolution, v, Th , start , df):
             for i in range(len(parent)):
                 path.append(parent[i])
+            print("found path")
             return path
 
         closed_set.append(current)
 
-        for delta_ in range(0,10,1):
+        for delta_ in range(-5,5,2):
             delta = np.deg2rad(delta_)
-            print("this is the delta",delta_)
-            T = 1
-            neighbor = traj_1(state, delta, T, PLOT=False)
-            print("printing neighbour" ,neighbor)
+            #print("this is the delta",delta_)
+            T = 0.1
+            trajectory = traj_1(state, delta, T, PLOT=False)
+            neighbor = trajectory[-1]
+            #print("printing neighbour" ,neighbor)
 
             if check_obstacle(neighbor):
                 continue
@@ -217,27 +228,40 @@ def astar(start, resolution): # for now leave obstacle
                     path.append(parent[i])
                 return path
 
-            score = current[0] + cost(state, neighbor)  + heuristic(neighbor, v, Th , start, df) # + cost2(neighbor)
-            print("printing score",score)
+            score = round( (current[0] + cost(state, neighbor)),3) # + heuristic(neighbor, v, Th , start, df) # + cost2(neighbor)
+            #print("printing score",score)
+            #score_.append(score)
 
             # change this to within a norm value
             a = True
-            for x in closed_set:
-                if (x[0] == neighbor).all():
+            for x in open_set:
+                diff = abs(neighbor[0] - x[1][0]) + abs(neighbor[1] - x[1][1])
+                # print(diff)
+                if ( diff < 2):
                     a = False
-                    if score < x[2]:
+                    if score < x[0]:
                         parent.append(state)
                         node = [score , neighbor , parent]
-                        open_set.append(node )
-                        #print(" appending neighbour throug a", node)
+                        open_set.append(node)
+                        # plt.plot(trajectory[:,0], trajectory[:,1],color='#FF0000')
+                        # plt.show()
+                        # plt.pause(0.1)
+                        # print(" appending neighbour throug a")
 
                     else:
+                        # print("rejected")
                         continue
+            # print("nxt loop")
+
             if a:
                 parent.append(state)
                 node = [score , neighbor , parent]
-                open_set.append(node )
-                #print(" appending neighbour throug b", node)
+                open_set.append(node)
+                # plt.plot(trajectory[:,0], trajectory[:,1],color='#FF0000')
+                # plt.show()
+                # plt.pause(0.1)
+                # print(" appending neighbour throug b")
+        #print(score_)
 
     return 'brake'
 
@@ -247,7 +271,7 @@ def astar(start, resolution): # for now leave obstacle
 
 v = 5 #velocity
 L = 2.5 #  wheelBase
-dt = 0.2 # time step
+dt = 0.05 # time step
 
 x0, y0, theta0 = 0, 0, np.deg2rad(0)
 delta = 0
