@@ -62,7 +62,9 @@ class States:
 def bicycle_model(state_p, del_d, v, L, dt):
     # print("now bicycle model")
     x, y, theta, delta = state_p
+    print("this is the current steering angle", delta)
     delta += del_d
+    print("this is the change in steering angle", del_d)
     beta = np.arctan(np.tan(delta)/2)
     x = x + v* np.cos(theta + beta)*dt
     y = y+v*np.sin(theta + beta)*dt
@@ -82,7 +84,7 @@ def traj_1(state, del_d, T, PLOT= True):
         x1,y1 = state_p[0:2]
         x,y,theta,delta = bicycle_model(state_p,del_d, v, L, dt)
         ds += np.sqrt((x-x1)**2 + (y - y1)**2)
-        trajectory.append([round(x,3),round(y,3),theta,delta])
+        trajectory.append([np.round(x,3),np.round(y,3),theta,delta])
 
     trajectory = np.array(trajectory)
     if PLOT == True:
@@ -98,8 +100,10 @@ def traj_1(state, del_d, T, PLOT= True):
 # tracking the vehicle along the centre line
 # state as state only
 def track_pos(neighbor, sp, coord, ds):
+    tme = 0.01
     x,y = neighbor[0:2]
     s = sp + ds
+    # print(s , " this is s")
     # which is the nearest s in coord
     close_s = np.argmin(np.abs(coord[3] - s))
     dist = []
@@ -112,7 +116,7 @@ def track_pos(neighbor, sp, coord, ds):
     closest_s = np.argmin(dist)
     yerr = dist[closest_s]
     pos = close_s + closest_s - n
-    plt.scatter(coord[0][pos] , coord[1][pos])
+    # plt.scatter(coord[0][pos] , coord[1][pos])
     # plt.pause(tme)
     theta_err =  np.abs(coord[2][pos] - neighbor[2])
     Sp = coord[3][pos]
@@ -125,13 +129,14 @@ def track_pos(neighbor, sp, coord, ds):
 def is_goal(sp, neighbor_sp, d , coord):
     # print("is_goal")
     s = sp + d
-
+    print("this is s currently from the goal checker", s)
     closest_s = np.argmin(np.abs(coord[3] - s ))
-    # plt.scatter(coord[0][closest_s] , coord[1][closest_s], s =100, marker = 'D')
-
+    # plt.scatter(coord[0][closest_s] , coord[1][closest_s], s =20, marker = 'D')
+    # plt.show()
+    # plt.pause(0.000001)
     nclose = np.argmin(np.abs(coord[3] - neighbor_sp ))
     # plt.scatter(coord[0][nclose] , coord[1][nclose], s =50, marker='*')
-    if neighbor_sp > sp + d:
+    if neighbor_sp > s :
         # plt.scatter(coord[0][nclose] , coord[1][nclose], s =200, marker='*')
         return True
     else:
@@ -139,13 +144,14 @@ def is_goal(sp, neighbor_sp, d , coord):
 
 ###########################
 # currently nothing is there
-def check_obstacle(neighbor ):
+def check_obstacle(neighbor, obs):
     ####
     # call collision checker in webots
     # True if the point in obstacle
     ####
-    width = 1;
-    obstacle = np.array([[8.73,45.3], [13.25, 51.06], [0.06,15.8],[4.89,43.87]])
+    width = 1.5;
+    obstacle = np.array([[148 ,-(12 + obs*0.2)],[8.73,45.3], [13.25, 51.06], [4.89,43.87],[72.73,59.81],[139.84,43.79],[148.86,-12.81],[150.8,-63.15], [147.08,13.61],[148.46,-40.36],[105.17,-88.96],[64.23,-88.96]])
+    plt.scatter(148 ,-(12 + obs*0.2))
     tag = False
     for points in obstacle:
         x , y = points
@@ -158,11 +164,15 @@ def check_obstacle(neighbor ):
 # change to coord
 def astar(start, resolution , coord, Th):
     # print("now running A*")
+    tme = 0.001
     parent = []
     states = States()
     start_s = start[4]
+    # print("this is the recieved sp", start_s)
     id = 0
     d = v*T
+    obs = 0
+
     node = [*start[0:5], parent, 0]
     states.add(id,node)
     closed_set = States()
@@ -192,8 +202,8 @@ def astar(start, resolution , coord, Th):
 
             trajectory , ds = traj_1(state_p, dd , Th, PLOT=False)
             neighbor = trajectory[-1]  #as 2 pieces so as to plot the trajectory later
-            yerr, theta_err, state_p[4] = track_pos(neighbor, node[4] , coord, ds)
-
+            yerr, theta_err, sp_4 = track_pos(neighbor, node[4] , coord, ds)
+            # print(sp_4, ds, "this is neighbours sp and ds")
             # current nodes Sp is updated here
             # print(" this is yerr", yerr)
             if abs(yerr) > 3:
@@ -204,24 +214,26 @@ def astar(start, resolution , coord, Th):
             if (state_p[4] - node[4]) < 0:
                 continue
 
-            if check_obstacle(neighbor):
+            if check_obstacle(neighbor,obs):
+                obs +=1
                 continue
 
             # print("neighbor sp is ",state_p[4])
-            if is_goal(start_s ,state_p[4], d, coord):
+            if is_goal(start_s ,sp_4, d, coord):
                 # print(state_p[0:3])
-                path.append(state_p[0:3])
+                path.append(state_p[0:4])
                 for id in reversed(state_p[5]):
-                    path.append([*closed_set.xy(id),closed_set.theta(id)])
+                    path.append([*closed_set.xy(id),closed_set.theta(id),closed_set.delta(id)])
                     # print([*closed_set.xy(id),closed_set.theta(id)])
                 return path
 
-            h = np.sqrt((start_s + v*T - state_p[4])**2)  # how far is the goal distance
+            h = np.sqrt((start_s + v*T - sp_4)**2)  # how far is the goal distance
             # cost1 = np.sqrt(ds**2)   # ds is path length of trajectory
             cost2 = yerr**2 + theta_err**2 + delta_**2 # cross track error and theta error
             # theta in coord is becoming nan sometime, and hence cost is becoming nan
             # print(" these are the costs and steering angle",delta_ ,node[6], h , cost1, cost2)
-            state_p[6] = round((h + cost2) , 3) # cost is updated
+            state_p[6] = np.round((h + cost2) , 3) # cost is updated
+            # print("this is the total cost",state_p[6])
 
 
             a = True # current neighbor is open to be added to states
@@ -236,13 +248,13 @@ def astar(start, resolution , coord, Th):
                     a = False # the state no longer needs to be checked to be added or not
                     if state_p[6] < states.cost(key):
                         id+= 1
-                        nodea = [ *neighbor,state_p[4], [*node[5] ,parent_id ],state_p[6]+node[6] ]
+                        nodea = [ *neighbor,sp_4, [*node[5] ,parent_id ],state_p[6]+node[6] ]
                         # print("this node is being added through a", nodea)
                         states.add(id,nodea) # the neighbour is added to state
 
-                        plt.plot(trajectory[:,0], trajectory[:,1],color='#FF0000')
-                        plt.show()
-                        plt.pause(tme)
+                        # plt.plot(trajectory[:,0], trajectory[:,1],color='#FF0000')
+                        # plt.show()
+                        # plt.pause(tme)
                         # print(" appending neighbour throug a")
                         break
                     else: # print("rejected")
@@ -253,13 +265,13 @@ def astar(start, resolution , coord, Th):
             if a:  # if there is no node within the resolution in states
                 id+= 1
 
-                nodeb = [*neighbor,state_p[4], [*node[5] ,parent_id ],state_p[6]+node[6]]
+                nodeb = [*neighbor,sp_4, [*node[5] ,parent_id ],state_p[6]+node[6]]
                 # print("this node is being added through b", nodeb)
                 states.add(id,nodeb) # the neighbour is added to state
 
-                plt.plot(trajectory[:,0], trajectory[:,1],color='#FF0000')
-                plt.show()
-                plt.pause(tme)
+                # plt.plot(trajectory[:,0], trajectory[:,1],color='#FF0000')
+                # plt.show()
+                # plt.pause(tme)
                 # print(" appending neighbour throug b")
         #print(score_)
 
@@ -283,6 +295,8 @@ def track(n):
     y0 = y[1]
     x[0] = x[1]     # replacing nan
     y[0] = y[1]
+
+
 
     x = np.array(x)
     y = np.array(y)
@@ -310,6 +324,8 @@ def track(n):
 
     return coord
 
+
+
 #########################
 # input parameters
 
@@ -323,6 +339,7 @@ Th = 1
 resolution = np.sqrt(0.4)
 T = 10 # time horizon for planning in front of car
 
+"""
 if __name__=='__main__':
 
     tme = 0.001
@@ -350,6 +367,7 @@ if __name__=='__main__':
         plt.pause(30)
     else:
         print('brake')
+"""
 
 """
 path is key of dict -  the closed_set
