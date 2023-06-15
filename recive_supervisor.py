@@ -8,7 +8,6 @@ Data is recived in the same order as it is sent
 so the timings should be same
 """
 
-
 import math
 from cvxpy import *
 import numpy as np
@@ -17,29 +16,29 @@ import warnings
 warnings.filterwarnings('ignore')
 from scipy.signal import cont2discrete , tf2ss
 import time
+import sys
 
 
 from controller import Supervisor
 
 ## initialization
-TIME_STEP = 100
+Ts = 0.05
+TIME_STEP = int(1000*Ts)
 supervisor = Supervisor()
 receiver = supervisor.getDevice("receiver")
 emitter = supervisor.getDevice("emitter")
-
 receiver.enable(TIME_STEP)
-
 
 accel = 0
 brake = 0
 
 ## Parameters
-T_eng = 0.460
+T_eng =0.460
 K_eng = 0.732
 A_f = -1/T_eng
 B_f = -K_eng/T_eng
 C = np.eye(3)
-T_hw = 1.6   ## also mentioned in controller
+T_hw = 1.3   ## also mentioned in controller
 Ts = 0.1
 T_total = 30
 T = int(T_total/Ts)
@@ -59,20 +58,22 @@ P = np.eye(nx)*0
 umax = 3.5
 umin = -3
 
-xmin = np.array([[0] ,[-2.5]])  # state constraints
-xmax = np.array([3])  # state constraints
+xmin = np.array([[0] ,[-1.5]])  # state constraints
+xmax = np.array([2])  # state constraints
 
-N = 20  # horizon
+N = 10  # horizon
 
 previous_message = ''
-
-## intial reference
-d = translation_field.getSFVec3f()[0]
-v =
-x0 = [15 , 0 , 0]
+xr = [0 , 0 , 0]
 
 curr_time = 0
 prev_time = 0
+
+def rnd(number, precision=3):
+    if isinstance(number, (int, float)):
+        return round(number, precision)
+    if isinstance(number , np.ndarray):
+        return np.round(number, precision)
 
 def cvxpy_reverse1(A, B, N, Q, R, P, x0, xr, umax=None, umin=None, xmin=None, xmax=None):
     is_sol =  False
@@ -154,33 +155,35 @@ def cvxpy_reverse1(A, B, N, Q, R, P, x0, xr, umax=None, umin=None, xmin=None, xm
 
 while supervisor.step(TIME_STEP) != -1:
     # recive the data
-    pos_ref =  translation_field.getSFVec3f()
-
-    print("this is sup Q length",receiver.getQueueLength())
+    # print("this is sup Q length",receiver.getQueueLength())
     if receiver.getQueueLength() > 0:
         message = receiver.getBytes()
-        xr = np.frombuffer(message, dtype=np.float64)
-        print(f"this is xr from supervisor  {xr} ")
+        x0 = rnd(np.frombuffer(message, dtype=np.float64))
+        print(f"this is x0 from supervisor  {x0} ")
         receiver.nextPacket()
 
     # give to optimization
         succ, x, u, c = cvxpy_reverse1(A, B, N, Q, R, P, x0, xr, umax = umax, umin = umin, xmin = xmin, xmax = xmax)
-        x0 = x[:,0]
+        if succ:
+            x0 = rnd(x[:,0])
 
     # make the command
         if succ:
-            if  u[0,0] >0:
+            if  u[0,0] >=0:
                 accel = np.nan
                 brake = u[0,0]/3.5
             else:
                 brake = np.nan
                 accel = u[0,0]/-3
         else:
-            brake == -10
+            brake = 10
+            accel = np.nan
 
-    command = np.array([accel, brake])
+    command = rnd(np.array([accel, brake]))
     message = command.tobytes()
     # send the commands
+    message_size = sys.getsizeof(message)
+    # print(message_size)
 
     if message != '' : #and message != previous_message:
         previous_message = message
