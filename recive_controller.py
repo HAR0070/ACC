@@ -22,6 +22,15 @@ emitter = driver.getDevice("emitter")
 
 ts = 0.1
 time_step = int(1000*ts)
+acelo = driver.getDevice("accelerometer")
+acelo.enable(time_step)
+ah = acelo.getValues()
+
+
+
+
+ts = 0.1
+time_step = int(1000*ts)
 """ do moving average of 5/4 eliments since time step here is 1/5th """
 
 gps.enable(time_step)  ##  time step corresponds to wait time in mili seconds
@@ -30,7 +39,7 @@ receiver.enable(time_step)
 receiver_ref.enable(time_step)
 
 driver.setGear(1)
-T_hw = 1.6 ## also mentioned in Supervisor
+T_hw = 1.3 ## also mentioned in Supervisor
 d0 = 3
 previous_message = ''
 
