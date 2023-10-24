@@ -150,7 +150,7 @@ def astar_v(start, goal,resolution):
         for u in jerk:
             state_p = node.copy() # copy of the parent node
 
-            if abs(state_p[2] - u) > 1.5:
+            if abs(state_p[5] - u) > 4:
                 continue
 
             trajectory, ds , acel , v = propogation(u, state_p,step_t)
