@@ -126,9 +126,8 @@ def is_goal(neighbor, goal, res):
     if (diff3 < res/2) and (diff2 < res) and (diff1 < res*2):
         return True
 
-def astar_v(start, goal,resolution):
+def astar_v(start, goal,resolution,step_t):
     # print("now running a star")
-    step_t = 1.5
     parent = []
     id = 0
     Ofringe = States()
@@ -150,7 +149,7 @@ def astar_v(start, goal,resolution):
         for u in jerk:
             state_p = node.copy() # copy of the parent node
 
-            if abs(state_p[5] - u) > 4:
+            if abs(state_p[5] - u) > 2:
                 continue
 
             trajectory, ds , acel , v = propogation(u, state_p,step_t)
@@ -216,9 +215,11 @@ def astar_v(start, goal,resolution):
 print("the A* supervisor controller is running")
 
 resolution = np.sqrt(0.01)
+step_t = 1.5
 dt = 0.1
 T = 0.532
 alpha = math.exp(-dt / T)
+a = 0
 
 while supervisor.step(TIME_STEP) != -1:
 
@@ -229,12 +230,12 @@ while supervisor.step(TIME_STEP) != -1:
         message = receiver.getBytes()
         msg = rnd(np.frombuffer(message, dtype=np.float64))
         goal = [msg[0],msg[1],0]
-        inital= [msg[2],msg[3],msg[4]]
-        # print(f"this is x0 from vehicle controller {msg} ")
+        initial= [msg[2],msg[3],msg[4]]
+        print(f"this is x0 from vehicle controller {msg} ")
         receiver.nextPacket()
 
       # give to optimization
-        path = astar_v(inital, goal, resolution)
+        path = astar_v(initial, goal, resolution,step_t)
         if path != 'brake' and path:
             if len(path) >= 2:
                 u = path[-2][-1]
@@ -255,6 +256,13 @@ while supervisor.step(TIME_STEP) != -1:
         else:
             brake = 10
             accel = np.nan
+            a += 1
+            if (goal[0] - initial[0])< 15 and step_t > 0.5 and a >3:
+                step_t = step_t - 0.2
+                a = 1
+            elif (goal[0] - initial[0]) > 15 and step_t < 2 and a >3:
+                step_t = step_t +0.2
+                a = 1
 
     command = np.array([accel, brake])
     message = command.tobytes()
@@ -268,5 +276,5 @@ while supervisor.step(TIME_STEP) != -1:
         # print(f"sent message from the controller is {command} ")
 
     curr_time = time.time()
-    # print("time taken is", curr_time - prev_time)
+    print("time taken is", curr_time - prev_time)
     prev_time = time.time()
