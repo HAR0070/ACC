@@ -241,44 +241,30 @@ while supervisor.step(TIME_STEP) != -1:
         msg = rnd(np.frombuffer(message, dtype=np.float64))
         goal = [msg[0],msg[1],0]
         initial= [msg[2],msg[3],msg[4]]
-        print(f"this is x0 from vehicle controller {msg} ")
+        # print(f"this is x0 from vehicle controller {msg} ")
         receiver.nextPacket()
 
       # give to optimization
       # a is acceleration output from a*
         path = astar_v(initial, goal, resolution,step_t)
-        if path != 'brake' and len(path) >= 2:
-            a = path[1][-1]
-            if  a >=0:
-                brake = np.nan
-                accel = a/2.5
-            else:
-                accel = np.nan
-                brake = a/-3.5
-            # else:
-            #     a = path[0][-1]
-            #     if  a >=0:
-            #         brake = np.nan
-            #         accel = a/2
-            #     else:
-            #         accel = np.nan
-            #         brake = a/-3.5
-        else:
-            brake = 10
-            accel = np.nan
-            failure_iter += 1
-            if step_t > 0.5 and failure_iter > 2: #(goal[0] - initial[0])< 15 and
-                step_t = step_t - 0.1
-                failure_iter = 1
-            # elif (goal[0] - initial[0]) > 15 and step_t < 2 and a >3:
-            #     step_t = step_t +0.2
-            #     failure_iter = 1
+        cmd = []
+    if path!='brake':
+        i=0
+        for point in path:
+            cmd.append(point[-1])
+            i+=1
+            if i>5:
+                break
+    else:
+        cmd = 'brake'
+        failure_iter += 1
+        if step_t > 0.5 and failure_iter > 2: #(goal[0] - initial[0])< 15 and
+            step_t = step_t - 0.1
+            failure_iter = 1
 
-    command = np.array([accel, brake])
+
+    command = np.array(cmd)
     message = command.tobytes()
-    # send the commands
-    # message_size = sys.getsizeof(message)
-    # print(message)
 
     if message != '' and message != previous_message:
         previous_message = message
@@ -286,6 +272,6 @@ while supervisor.step(TIME_STEP) != -1:
         # print(f"sent message from the controller is {command} ")
 
     curr_time = time.time()
-    print("time taken is", curr_time - prev_time)
-    print(f"this is failure attempt {failure_iter}")
+    # print("time taken is", curr_time - prev_time)
+    # print(f"this is failure attempt {failure_iter}")
     prev_time = time.time()
