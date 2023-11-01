@@ -97,20 +97,30 @@ def propogation(u,state_p,step_t= 0.5):
     t[0] = 0
     k = 0.743
     T = 0.532
+    iter = 0
     for i in range(N):
         # Compute the jerk (third derivative of x) using the equation
         # Update the position, velocity, and acceleration using Euler's method
         x[i+1] = x[i] + x_dot*dt + 0.5*x_doubledot*dt*dt
         x_dot += x_doubledot * dt
-        if x_doubledot < 2 or x_doubledot > -3.5:
+        if x_doubledot < 2.5 or x_doubledot > -3.5:
             x_doubledot = x_doubledot*0.98  + k*u*(1 - alpha)
-        elif x_doubledot > 2:
-            x_doubledot  = 2
+            if iter ==0:
+                accel_to_cmd = x_doubledot
+                iter +=1
+        elif x_doubledot > 2.5:
+            x_doubledot  = 2.5
+            if iter ==0:
+                accel_to_cmd = x_doubledot
+                iter +=1
         elif x_doubledot < -3.5:
             x_doubledot = -3.5
+            if iter ==0:
+                accel_to_cmd = x_doubledot
+                iter +=1
         # Store or use the generated state x
         t[i+1] = t[i] + dt
-    return x , x[-1]-x[0], x_doubledot, x_dot
+    return x , x[-1]-x[0], accel_to_cmd, x_dot
 
 def is_goal(neighbor, goal, res):
     # goal will be x coordinate with a and v
@@ -165,10 +175,10 @@ def astar_v(start, goal,resolution,step_t):
                 continue
 
             if is_goal(neighbor, goal, resolution):
-                path.append(neighbor[0:3])
                 # plt.scatter(i,i)
-                for id in reversed(state_p[3]):
+                for id in state_p[3]:
                     path.append([Cfringe.x(id), Cfringe.v(id), Cfringe.a(id)])
+                path.append(neighbor[0:3])
                 return path
             # if is_goal(neighbor, goal, resolution):
             #     path.append([*neighbor[0:3],u])
@@ -179,7 +189,7 @@ def astar_v(start, goal,resolution,step_t):
             #         # plt.scatter(Cfringe.input(id), Cfringe.input(id),marker='#')
             #     return command
 
-            cost = 0.2*u**2 + (Cfringe.v(parent_id) - neighbor[1])**2 + (Cfringe.a(parent_id) - acel)**2 + (Cfringe.v(parent_id)*1.5 - ds)**2
+            cost = 0.2*u**2 + 0.5*(Cfringe.v(parent_id) - neighbor[1])**2 + 0.5*(Cfringe.a(parent_id) - acel)**2 + (Cfringe.v(parent_id)*1.5 - ds)**2
             h2 = (goal[0] - neighbor[0])**2  + acel**2
 
             cost = h2 + cost
@@ -219,7 +229,7 @@ step_t = 1.5
 dt = 0.1
 T = 0.532
 alpha = math.exp(-dt / T)
-a = 0
+failure_iter = 0
 
 while supervisor.step(TIME_STEP) != -1:
 
@@ -235,34 +245,34 @@ while supervisor.step(TIME_STEP) != -1:
         receiver.nextPacket()
 
       # give to optimization
+      # a is acceleration output from a*
         path = astar_v(initial, goal, resolution,step_t)
-        if path != 'brake' and path:
-            if len(path) >= 2:
-                u = path[-2][-1]
-                if  u >=0:
-                    brake = np.nan
-                    accel = u/2
-                else:
-                    accel = np.nan
-                    brake = u/-3.5
+        if path != 'brake' and len(path) >= 2:
+            a = path[1][-1]
+            if  a >=0:
+                brake = np.nan
+                accel = a/2.5
             else:
-                u = path[-1][-1]
-                if  u >=0:
-                    brake = np.nan
-                    accel = u/2
-                else:
-                    accel = np.nan
-                    brake = u/-3.5
+                accel = np.nan
+                brake = a/-3.5
+            # else:
+            #     a = path[0][-1]
+            #     if  a >=0:
+            #         brake = np.nan
+            #         accel = a/2
+            #     else:
+            #         accel = np.nan
+            #         brake = a/-3.5
         else:
             brake = 10
             accel = np.nan
-            a += 1
-            if (goal[0] - initial[0])< 15 and step_t > 0.5 and a >3:
-                step_t = step_t - 0.2
-                a = 1
-            elif (goal[0] - initial[0]) > 15 and step_t < 2 and a >3:
-                step_t = step_t +0.2
-                a = 1
+            failure_iter += 1
+            if step_t > 0.5 and failure_iter > 2: #(goal[0] - initial[0])< 15 and
+                step_t = step_t - 0.1
+                failure_iter = 1
+            # elif (goal[0] - initial[0]) > 15 and step_t < 2 and a >3:
+            #     step_t = step_t +0.2
+            #     failure_iter = 1
 
     command = np.array([accel, brake])
     message = command.tobytes()
@@ -277,4 +287,5 @@ while supervisor.step(TIME_STEP) != -1:
 
     curr_time = time.time()
     print("time taken is", curr_time - prev_time)
+    print(f"this is failure attempt {failure_iter}")
     prev_time = time.time()

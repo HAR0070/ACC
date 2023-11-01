@@ -74,24 +74,34 @@ def propogation(u,state_p, plot = False):
     t[0] = 0
     k = 0.743
     T = 0.532
+    iter = 0
     for i in range(N):
         # Compute the jerk (third derivative of x) using the equation
         # Update the position, velocity, and acceleration using Euler's method
         x[i+1] = x[i] + x_dot*dt + x_doubledot*dt
         x_dot += x_doubledot * dt
-        if x_doubledot < 2 or x_doubledot > -3.5:
+        if x_doubledot < 2.5 or x_doubledot > -3.5:
             x_doubledot = x_doubledot*0.98  + k*u*(1 - alpha)
-        elif x_doubledot > 2:
-            x_doubledot  = 2
+            if iter ==0:
+                accel_to_cmd = x_doubledot
+                iter+=1
+        elif x_doubledot > 2.5:
+            x_doubledot  = 2.5
+            if iter ==0:
+                accel_to_cmd = x_doubledot
+                iter+=1
         elif x_doubledot < -3.5:
             x_doubledot = -3.5
+            if iter ==0:
+                accel_to_cmd = x_doubledot
+                iter+=1
         # Store or use the generated state x
         t[i+1] = t[i] + dt
     if plot:
         plt.scatter(x,t)
         plt.show()
         plt.pause(0.001)
-    return x , x[-1]-x[0], x_doubledot, x_dot
+    return x , x[-1]-x[0], accel_to_cmd, x_dot
 
 def is_goal(neighbor, goal, do, T_hw, res):
     # goal will be x coordinate with a and v
@@ -131,7 +141,7 @@ def astar_v(start, goal, do, T_hw, resolution):
         for u in jerk:
             state_p = node # copy of the parent node
 
-            if abs(state_p[2] - u) > 1.5:
+            if abs(state_p[5] - u) > 2:
                 continue
 
             trajectory, ds , acel , v = propogation(u, state_p) # add false
@@ -159,38 +169,13 @@ def astar_v(start, goal, do, T_hw, resolution):
                     path.append([Cfringe.x(id), Cfringe.v(id), Cfringe.a(id), u])
                 return path
 
-            # h1 = 0
-            # h2 = 0
-            # # cost = (0.1/(ds + 0.1)) + 2*jerk**2 + 5*a**2
-            # cost1 = (goal[0]- neighbor[0])**2 # + do
-            # cost2 = (acel)**2  #+ 1/(ds + 0.1) + 2*jerk**2
-            # cost3 = (goal[1] - neighbor[1])**2
-            #
-            # cost = np.round((cost2*2+cost3*1.2+ cost1*1.1), 3)
+
             cost = 0.2*u**2 + (Cfringe.v(parent_id) - neighbor[1])**2 + (Cfringe.a(parent_id) - acel)**2 + (Cfringe.v(parent_id)*1.5 - ds)**2
             h2 = (goal[0] - neighbor[0])**2  + acel**2
-            # cost = (0.1/(ds + 0.1)) + 2*jerk**2 + 5*a**2
-            # cost1 = abs(goal[0]- neighbor[0])
-            # cost2 = (acel)**2  #+ 1/(ds + 0.1) + 2*jerk**2
-            # cost3 = (goal[1] - neighbor[1])
             cost = h2 + cost #cost2*0.2 +cost3*0.2 + cost1*0.2 + h2*0.2 + cost
 
             tag = True
             res = resolution**2
-            # for key in Ofringe.key():
-            #     if (neighbor[0] - Ofringe.x(key))**2 < res:
-            #         tag = False
-            #         break
-            # if tag:
-            #     for key in Ofringe.key():
-            #         if (neighbor[1] - Ofringe.v(key))**2 < res :
-            #             tag = False
-            #             break
-            # if tag:
-            #     for key in Ofringe.key():
-            #         if (neighbor[2] - Ofringe.a(key))**2 < res:
-            #             tag = False
-            #             break
 
             for key in Ofringe.key():
                 diff1 = (neighbor[0] - Ofringe.x(key))**2
@@ -201,7 +186,7 @@ def astar_v(start, goal, do, T_hw, resolution):
                     tag = False
                     if state_p[4] < Ofringe.cost(key):
                         id+=1
-                        nodea = [*neighbor, [*node[3], parent_id], cost+ node[4], u]
+                        nodea = [*neighbor, node[3].append(parent_id), cost+ node[4], u]
                         Ofringe.add(id,nodea)
                         Ofringe.rmv_id(key)
                         break
@@ -211,7 +196,7 @@ def astar_v(start, goal, do, T_hw, resolution):
                     continue
             if tag:
                 id+=1
-                nodeb = [*neighbor, [*node[3], parent_id], cost+ node[4], u]
+                nodeb = [*neighbor, node[3].append(parent_id), cost+ node[4], u]
                 Ofringe.add(id,nodeb)
 
 

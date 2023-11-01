@@ -16,13 +16,20 @@ Needs work on
     - Resolution for is_goal
     - Cost function
 """
+"""
+Give 10 inputs as results - if by next step solution is not found use these
+Change vehicle model to suit webots
+Make change in webots to include 1st order Dynamics
+Find the time step with which driver.c works with
+"""
 
-"""
-states are maintaned as dictionory
-each state has a id
-order is x v a parent_id cost
-"""
+
 class States:
+    """
+    states are maintaned as dictionory
+    each state has a id
+    order is x v a parent_id cost
+    """
     def __init__(self):
         self.data = {}
 
@@ -69,7 +76,7 @@ class States:
 
 def forward_propogation(u,state_p, plot = False):
     # Initialization
-    step_t = 1
+    step_t = 1.5
     dt = 0.1
     N = int(step_t/dt)
     x = np.zeros((N+1,1))
@@ -80,28 +87,38 @@ def forward_propogation(u,state_p, plot = False):
     t[0] = 0
     k = 0.743
     T = 0.532
+    iter = 0
     for i in range(N):
         # Compute the jerk (third derivative of x) using the equation
         # Update the position, velocity, and acceleration using Euler's method
-        x[i+1] = x[i] + x_dot*dt + 0.5*x_doubledot*dt*dt
+        x[i+1] = x[i] + x_dot*dt + x_doubledot*dt
         x_dot += x_doubledot * dt
-        if x_doubledot <= 2 or x_doubledot >= -3.5:
+        if x_doubledot < 2.5 or x_doubledot > -3.5:
             x_doubledot = x_doubledot*0.98  + k*u*(1 - alpha)
-        elif x_doubledot > 2:
-            x_doubledot  = 2
+            if iter ==0:
+                accel_to_cmd = x_doubledot
+                iter+=1
+        elif x_doubledot > 2.5:
+            x_doubledot  = 2.5
+            if iter ==0:
+                accel_to_cmd = x_doubledot
+                iter+=1
         elif x_doubledot < -3.5:
             x_doubledot = -3.5
+            if iter ==0:
+                accel_to_cmd = x_doubledot
+                iter+=1
         # Store or use the generated state x
         t[i+1] = t[i] + dt
     if plot:
         plt.scatter(x,t)
         plt.show()
         plt.pause(0.001)
-    return x , x[-1]-x[0], x_doubledot, x_dot
+    return x , x[-1]-x[0], accel_to_cmd, x_dot
 
 def reverse_propogation(u,state_p, plot = False):
     # Initialization
-    step_t = 1
+    step_t = 1.5
     dt = 0.1
     N = int(step_t/dt)
     x = np.zeros((N+1,1))
@@ -112,24 +129,34 @@ def reverse_propogation(u,state_p, plot = False):
     t[0] = 0
     k = 0.743
     T = 0.532
+    iter = 0
     for i in range(N):
         # Compute the jerk (third derivative of x) using the equation
         # Update the position, velocity, and acceleration using Euler's method
         x[i+1] = x[i] - x_dot*dt - 0.5*x_doubledot*dt*dt
         x_dot -= x_doubledot * dt
-        if x_doubledot <= 2 or x_doubledot >= -3.5:
+        if x_doubledot <= 2.5 or x_doubledot >= -3.5:
             x_doubledot = (x_doubledot - k*u*(1 - alpha))/0.98
-        elif x_doubledot > 2:
-            x_doubledot  = 2
+            if iter ==0:
+                accel_to_cmd = x_doubledot
+                iter+=1
+        elif x_doubledot > 2.5:
+            x_doubledot  = 2.5
+            if iter ==0:
+                accel_to_cmd = x_doubledot
+                iter+=1
         elif x_doubledot < -3.5:
             x_doubledot = -3.5
+            if iter ==0:
+                accel_to_cmd = x_doubledot
+                iter+=1
         # Store or use the generated state x
         t[i+1] = t[i] + dt
     if plot:
         plt.scatter(x,t)
         plt.show()
         plt.pause(0.001)
-    return x , x[0]-x[-1], x_doubledot, x_dot
+    return x , x[0]-x[-1], accel_to_cmd, x_dot
 
 def is_goal(neighbor, goal, do, T_hw, res):
     # goal will be x coordinate with a and v
@@ -143,9 +170,9 @@ def is_goal(neighbor, goal, do, T_hw, res):
 def solution_path(gkey,skey,cg_fringe,cs_fringe):
     print("Path found by intersection")
     path = []
-    for id in reversed(cs_fringe.parent_id(skey)):
+    for id in cs_fringe.parent_id(skey):
         path.append([cs_fringe.x(id), cs_fringe.v(id), cs_fringe.a(id), cs_fringe.input(id)])
-    for id in cg_fringe.parent_id(gkey):
+    for id in reversed(cg_fringe.parent_id(gkey)):
         path.append([cg_fringe.x(id), cg_fringe.v(id), cg_fringe.a(id), cg_fringe.input(id)])
     return path
 
@@ -331,7 +358,7 @@ if __name__=='__main__':
     T_hw = 1
     resolution = np.sqrt(0.01)
     intial = 45 , 0 , 0
-    goal = 65 , 0 , 0
+    goal = 85 , 0 , 0
     dt = 0.1
     T = 0.532
     alpha = math.exp(-dt / T)
@@ -348,7 +375,7 @@ if __name__=='__main__':
         plt.plot(x,v, label = "position" ,linewidth=2.5)
         plt.scatter(goal[0], goal[1] , marker='D')
         # plt.plot(v,label = "velocity" , linewidth=2.5 )
-        # plt.plot(x,a ,label = "accel",  linewidth=2.5)
+        plt.plot(x,a ,label = "accel",  linewidth=2.5)
 
         plt.legend()
         plt.show()
