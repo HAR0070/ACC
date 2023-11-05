@@ -113,6 +113,11 @@ def propogation(u,state_p,step_t= 0.5):
             if iter ==0:
                 accel_to_cmd = x_doubledot
                 iter +=1
+        elif x_doubledot < 0:
+            x_doubledot = u*5000/1847
+            if iter == 0:
+                accel_to_cmd = x_doubledot
+                iter +=1
         elif x_doubledot < -3.5:
             x_doubledot = -3.5
             if iter ==0:
@@ -137,7 +142,7 @@ def is_goal(neighbor, goal, res):
         return True
 
 def astar_v(start, goal,resolution,step_t):
-    # print("now running a star")
+    print("now running a star")
     parent = []
     id = 0
     Ofringe = States()
@@ -146,10 +151,10 @@ def astar_v(start, goal,resolution,step_t):
     Cfringe = States()
     path = []
     if is_goal(start, goal,resolution):
-        return path
+        return -100
 
     b = 0
-    jerk = [i * 0.3 for i in range(-5, 5)]
+    jerk = [i * 0.5 for i in range(-15, 15)]
     while Ofringe.len() >0:
         b +=1
         keyp, node = Ofringe.remove()
@@ -219,7 +224,7 @@ def astar_v(start, goal,resolution,step_t):
                 nodeb = [*neighbor, [*node[3], parent_id], cost+ node[4], u]
                 Ofringe.add(id,nodeb)
 
-    return 'brake'
+    return -100
 
 
 print("the A* supervisor controller is running")
@@ -230,6 +235,7 @@ dt = 0.1
 T = 0.532
 alpha = math.exp(-dt / T)
 failure_iter = 0
+message = ''
 
 while supervisor.step(TIME_STEP) != -1:
 
@@ -248,23 +254,24 @@ while supervisor.step(TIME_STEP) != -1:
       # a is acceleration output from a*
         path = astar_v(initial, goal, resolution,step_t)
         cmd = []
-    if path!='brake':
-        i=0
-        for point in path:
-            cmd.append(point[-1])
-            i+=1
-            if i>5:
-                break
-    else:
-        cmd = 'brake'
-        failure_iter += 1
-        if step_t > 0.5 and failure_iter > 2: #(goal[0] - initial[0])< 15 and
-            step_t = step_t - 0.1
-            failure_iter = 1
+        if path!= -100 and len(path)>1:
+            i=0
+            path.pop(0)
+            for point in path:
+                cmd.append(point[-1])
+                i+=1
+                if i>5:
+                    break
+        else:
+            cmd = -100
+            failure_iter += 1
+            if step_t > 0.5 and failure_iter > 2: #(goal[0] - initial[0])< 15 and
+                step_t = step_t - 0.1
+                failure_iter = 1
 
 
-    command = np.array(cmd)
-    message = command.tobytes()
+        command = np.array(cmd)
+        message = command.tobytes()
 
     if message != '' and message != previous_message:
         previous_message = message
