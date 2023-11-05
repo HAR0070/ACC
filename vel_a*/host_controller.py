@@ -41,7 +41,7 @@ xr_v = 0
 
 commands = np.array([0,0])
 
-def rnd(number, precision=2):
+def rnd(number, precision=4):
     if isinstance(number, (int, float)):
         return round(number, precision)
     if isinstance(number , np.ndarray):
@@ -67,13 +67,16 @@ get_filtered_acel.previousAcel = np.array([0,0])
 get_filtered_acel.prevTime = np.array([0,0])
 
 
+cmd = [[0,0]]
+
 while driver.step() != -1:
+    # driver.setThrottle(1)
     if receiver_ref.getQueueLength() > 0:
         message = receiver_ref.getBytes()
         coord = rnd(np.frombuffer(message, dtype=np.float64))
         xr_d = rnd(coord[0])
         xr_v = rnd(coord[1])
-        print(f"this is the ref vehicle coord from reference controller-- {coord} ")
+        # print(f"this is the ref vehicle coord from reference controller-- {coord} ")
         receiver_ref.nextPacket()
 
     #vehicle paramters
@@ -117,55 +120,57 @@ while driver.step() != -1:
     ## recive command and execute command
     # print("this is q length" ,receiver.getQueueLength())
 
-    cmd = [[0,0]]
     if receiver.getQueueLength() > 0:
-        i = 0
+
         message = receiver.getBytes()
-        path = rnd(np.frombuffer(message, dtype=np.float64))
-        print(f"this is cmd {cmd}")
+        path = np.frombuffer(message, dtype=np.float64)
+        path = np.array(path, dtype=np.float64)
+
+        # path = path.reshape((-1,1))
+
+        if np.isnan(path[0]):
+            path[0] = -3
         # print(f"this is the commands from cmd device -- {commands} ")
         receiver.nextPacket()
         cmd = np.empty((0,2))
-        if path != 'brake' and len(path) >= 2:
+        if not isinstance(path, str) and len(path) >= 0 and path[0]!= -100:
             for a in path:
                 if  a >=0:
                     brake = np.nan
-                    accel = a/2.5
+                    accel = a
                     cmd = np.vstack((cmd,[accel, brake]))
                 else:
                     accel = np.nan
-                    brake = a/-3.5
+                    brake = a/-3
                     cmd = np.vstack((cmd,[accel, brake]))
+            # print(f"this is cmd {cmd}")
+            commands = cmd[0]
+            cmd = cmd[1:]
+
+            if math.isnan(commands[1]):
+                driver.setBrakeIntensity(0)
+                driver.setThrottle(commands[0])
+                print("setting throttle to", commands[0])
+            else :
+                driver.setBrakeIntensity(commands[1])
+                print("brake intensity to",commands[1])
+
         else:
             driver.setBrakeIntensity(1)
             print("No solution brake intensity to" , int(1))
 
-        commands = cmd[i]
-        i+=1
-
+    elif len(cmd)>0:
+        # print("this is alternate path try")
+        commands = cmd[0]
+        cmd = cmd[1:]
+        # print(f"this is commands {commands} in alternate path")
         if math.isnan(commands[1]):
             driver.setBrakeIntensity(0)
             driver.setThrottle(commands[0])
-            print("setting throttle to", commands[0])
+            print("setting throttle in alternate path to", commands[0])
         else :
             driver.setBrakeIntensity(commands[1])
-            print("brake intensity to",commands[1])
-    elif len(cmd)>0:
-        try:
-            if len(cmd)>i:
-                commands = cmd[i]
-                i+=1
-                if math.isnan(commands[1]):
-                    driver.setBrakeIntensity(0)
-                    driver.setThrottle(commands[0])
-                    print("setting throttle to", commands[0])
-                else :
-                    driver.setBrakeIntensity(commands[1])
-                    print("brake intensity to",commands[1])
-        except NameError:
-            i = 0
-            driver.setBrakeIntensity(1)
-            print("No solution brake intensity to" , int(1))
+            print("brake intensity in alternate path to",commands[1])
 
     else:
         pass
