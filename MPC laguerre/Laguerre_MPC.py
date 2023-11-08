@@ -272,6 +272,7 @@ if __name__=="__main__":
 
     # Initialize variables
     N_sim = T
+    Nc = 15
 
     u = np.zeros((n_in, 1))
     xm = np.array([[50], [10], [2]])
