@@ -32,7 +32,7 @@ receiver.enable(time_step)
 receiver_ref.enable(time_step)
 
 driver.setGear(1)
-T_hw = 1.3 ## also mentioned in Supervisor
+T_hw = 0.5 ## also mentioned in Supervisor
 d0 = 1.5
 previous_message = ''
 
@@ -98,7 +98,7 @@ while driver.step() != -1:
     if math.isnan(xh):
         xh = 0
 
-    d_c = -xr_d - (-xh +d0) # reference del d
+    d_c = -xr_d - (-xh +d0 + T_hw*vh) # reference del d
     # print(f"this is dc {rnd(d_c)} xrd {xr_d} xh {xh} vh = {vh} Thw*vh {rnd(T_hw*vh)}")
     v_c = xr_v - vh # reference del v
 
