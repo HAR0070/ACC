@@ -12,6 +12,7 @@ import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
 from scipy.signal import cont2discrete
+import control.matlab as cm
 import time
 import sys
 
@@ -23,6 +24,7 @@ def rnd(number, precision=3):
         return round(number, precision)
     if isinstance(number , np.ndarray):
         return np.round(number, precision)
+
 
 def lagd(a, N):
     v = np.zeros(N)
@@ -187,11 +189,16 @@ def Mu(a, N, Nc, n_in=1):
 
     return M1
 
+def exp_matrix(size, alpha):
+    I = np.zeros((size,size))
+    for i in range(0,size):
+        I[i,i] = pow(alpha,i)
+
+    return I
+
 ## Constrints are clamping type
-def simCon3(xm, y, Ae, Be, Ce, N_sim, Omega, Psi, Lzerot, M0, M1):
-    m1, n1 = Ce.shape
-    u = np.zeros((1, 1))
-    yr = np.array([[0], [0], [0]])
+def simCon3(xm, u, y, yr, A1, A2, B1 , B2, C, N_sim, Omega1, Omega2, Psi1, Psi2, Lzerot, M0, M1, I):
+    m1, n1 = C.shape
     # n1, _ = Bp.shape
     n_in = 1
     Lzerot = Lzerot.reshape(-1,1)
@@ -202,12 +209,12 @@ def simCon3(xm, y, Ae, Be, Ce, N_sim, Omega, Psi, Lzerot, M0, M1):
     delu_max = 3.5
     Nc = 15   # number of steps on which limit has to be imposed
     M = np.vstack((M0,-M0,M1, -M1))
+    M = M@I
 
-
-    u1 = np.zeros((N_sim, 1))
+    u1 = np.zeros((n_in, N_sim))
     y1 = np.zeros((m1, N_sim))
-    deltau1 = np.zeros((N_sim,1))
-    xf = np.vstack((xm, (y - yr)))
+    deltau1 = np.zeros((n_in, N_sim))
+    # xf = np.vstack((xm, (y - yr)))
 
     for kk in range(N_sim):
         u_prev = u
@@ -216,7 +223,10 @@ def simCon3(xm, y, Ae, Be, Ce, N_sim, Omega, Psi, Lzerot, M0, M1):
                     , delu_max * np.ones((Nc,1))
                     , -delu_min * np.ones((Nc,1))))
         # print(f"this is Omega {Omega.shape}, Psi {Psi.shape}, M {M.shape}, gamma {gamma.shape}")
-        eta = QPHild(Omega, Psi@xf, M, gamma)
+        if u >=0:
+            eta = QPHild(Omega1, Psi1@xm, M, gamma)
+        elif u < 0:
+            eta = QPHild(Omega2, Psi2@xm, M, gamma)
         # Kmpc = np.transpose(Lzerot) @ np.linalg.solve(Omega, Psi)
         # Ke = Kmpc[0,3:6].reshape(1,-1)
         deltau = np.transpose(Lzerot) @ eta   #
@@ -230,21 +240,23 @@ def simCon3(xm, y, Ae, Be, Ce, N_sim, Omega, Psi, Lzerot, M0, M1):
         if u[0] < u_min:
             u[0] = u_min
 
-        deltau1[kk] = deltau
-        u1[kk] = u
-        xm_old = xm.copy()
-        xm = Ae@xm + Be@u
-        y = Ce@xm
+        deltau1[:, kk] = deltau
+        u1[:, kk] = u
+        # xm_old = xm.copy()
+        if u >= 0:
+            xm = A1@xm + B1@u
+        elif u <0:
+            xm = A2@xm + B2@u
+        y = C@xm
         # xf = (Ae - Be@Kmpc) @ xf + Be @ Ke @ yr #xf = Ae @ xf + Be @ deltau
         # y = Ce @ xf
 
         y1[:,kk] = y.reshape(3,)
-        xf = np.vstack((xm - xm_old, y - yr)) #Xf = np.vstack((xm - xm_old, y - sp[:, kk + 1]))
+        # xf = np.vstack((xm - xm_old, y - yr)) #Xf = np.vstack((xm - xm_old, y - sp[:, kk + 1]))
 
     k = np.arange(N_sim)
 
     return u1, y1, deltau1, k
-
 
 ## initialization
 Ts = 0.05
@@ -257,48 +269,62 @@ receiver.enable(TIME_STEP)
 accel = 0
 brake = 0
 
-## Parameters
-T_eng =  0.460 #0.26  #
-K_eng = 0.732
+T_eng =  0.460 #0.26
+K_eng = 0.732  # can add second order term if error is more
+T_brake = 0.193
+K_brake = 0.973
 A_f = -1/T_eng
 B_f = K_eng/T_eng
+A_b = -1/T_brake
+B_b = K_brake/T_brake
+
 C = np.eye(3)
 T_hw = 3
 Ts = 0.05
 T_total = 20
 T = int(T_total/Ts)
 
-# Discretize the system
+#Discretize the system
 A = np.array([[0, 1, -T_hw], [0, 0, -1], [0, 0, A_f]])
 B = np.array([[0], [0], [B_f]])
 sys2 = cont2discrete((A,B, C, 0), Ts, method='zoh')
-A, B, C, D , dt = sys2
+A1, B1, C, D , dt = sys2
+
+A = np.array([[0, 1, -T_hw], [0, 0, -1], [0, 0, A_b]])
+B = np.array([[0], [0], [B_b]])
+sys3 = cont2discrete((A,B, C, 0), Ts, method='zoh')
+A2, B2, C, D , dt = sys3
+
 
 m1,n1 = C.shape  # m1 = 3, n1 = 3
 n1,n_in = B.shape  # n_in = 1
 
-a1 = 0.6  #0.6 and weight 10*Ce@Ce and R - 1, a = 5 - 7  ( 7 is slow, 5 is fast response)
-N1 = 8
-Np = 100
+###################
+# Tuning parameters
+#
+a1 = 0.7 #0.6 and weight 10*Ce@Ce and R - 1, a = 5 - 7  ( 7 is slow, 5 is fast response)
+N1 = 6
+Np = 30
+alpha = 1.03 ## Exponential weight
+R1 = 1.2*np.eye(1,1)
+R2 = 1.3*np.eye(1,1)
+Q = np.transpose(C)@C
+#
+#
+###################
+
+
+_, S1, _ = cm.dlqr(A1, B1, Q, R)
+_, S2, _ = cm.dlqr(A2, B2, Q, R)
+
+Q1 = (1/alpha)**2*Q + (1-(1/alpha)**2)*S1
+Q2 = (1/alpha)**2*Q + (1-(1/alpha)**2)*S2
+R1 = (1/alpha)**2 * R1
+R2 = (1/alpha)**2 * R2
 
 a = [a1]
 N = [N1]
 
-# Augment the state equations
-Ae = np.eye(n1+m1,n1+m1)
-Ae[0:n1,0:n1] = A
-Ae[n1:n1+m1,0:n1] = C@A
-Be = np.zeros((n1+m1,n_in))
-Be[0:n1,:] = B
-Be[n1:n1+m1,:] = C@B
-Ce = np.zeros((m1,n1+m1))
-Ce[:,n1:n1+m1] = np.eye(m1,m1)
-
-# Q1 = np.transpose(C)@C
-
-Q = 14*np.transpose(Ce)@Ce
-print(Q.shape)
-R = 1*np.eye(1,1)
 
 # Initialize variables
 N_sim = 50
@@ -309,10 +335,13 @@ xm = np.array([[50], [10], [2]])
 y = xm.copy()
 yr = np.array([[0], [0], [0]])
 M1, Lzerot = Mdu(a, N,Nc,n_in)
+
 M0 = Mu(a, N,Nc,n_in)
 _, Lz = lagd(a[0], N[0])
-alpha = 1.02
-Omega, Psi = dmpc(Ae/alpha, Be/alpha, a, N, Np, Q, R)
+I = exp_matrix(N[0], alpha)
+
+Omega1, Psi1 = dmpc(A1/alpha, B1/alpha, a, N, Np, Q1, R1)
+Omega2, Psi2 = dmpc(A2/alpha, B2/alpha, a, N, Np, Q2, R2)
 
 previous_message = ''
 
@@ -330,7 +359,8 @@ while supervisor.step(TIME_STEP) != -1:
         x0 = x0.reshape(3,1)
         receiver.nextPacket()
 
-        path , y , deltau1 , k = simCon3(x0,y1,A,B,C,N_sim,Omega,Psi,Lz,M0, M1)
+        path , y , deltau1 , k=simCon3(xm,u,y,yr,A1/alpha,A2/alpha,B1/alpha,B2/alpha,C,N_sim,Omega1, Omega2,Psi1, Psi2,Lz,M0, M1,I)
+
         y1 = y[:,0].reshape(3,1)
         print(f"this is y1 {y1}")
         # give to optimization
