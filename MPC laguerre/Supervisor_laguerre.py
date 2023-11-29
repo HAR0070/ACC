@@ -25,7 +25,6 @@ def rnd(number, precision=3):
     if isinstance(number , np.ndarray):
         return np.round(number, precision)
 
-
 def lagd(a, N):
     v = np.zeros(N)
     Lo = np.zeros(N)
@@ -314,8 +313,8 @@ Q = np.transpose(C)@C
 ###################
 
 
-_, S1, _ = cm.dlqr(A1, B1, Q, R)
-_, S2, _ = cm.dlqr(A2, B2, Q, R)
+_, S1, _ = cm.dlqr(A1, B1, Q, R1)
+_, S2, _ = cm.dlqr(A2, B2, Q, R2)
 
 Q1 = (1/alpha)**2*Q + (1-(1/alpha)**2)*S1
 Q2 = (1/alpha)**2*Q + (1-(1/alpha)**2)*S2
@@ -343,10 +342,10 @@ I = exp_matrix(N[0], alpha)
 Omega1, Psi1 = dmpc(A1/alpha, B1/alpha, a, N, Np, Q1, R1)
 Omega2, Psi2 = dmpc(A2/alpha, B2/alpha, a, N, Np, Q2, R2)
 
-previous_message = ''
+message = ''
 
 y1 = np.array([[50], [10], [2]])
-path = [-100]
+path = [[-100]]
 failure_iter  = 0
 
 while supervisor.step(TIME_STEP) != -1:
@@ -355,29 +354,20 @@ while supervisor.step(TIME_STEP) != -1:
     if receiver.getQueueLength() > 0:
         message = receiver.getBytes()
         x0 = rnd(np.frombuffer(message, dtype=np.float64))
-        print(f"this is x0 from supervisor  {x0} and shape {x0.shape} ")
+        # print(f"this is x0 from supervisor  {x0} and shape {x0.shape} ")
         x0 = x0.reshape(3,1)
         receiver.nextPacket()
 
         path , y , deltau1 , k=simCon3(xm,u,y,yr,A1/alpha,A2/alpha,B1/alpha,B2/alpha,C,N_sim,Omega1, Omega2,Psi1, Psi2,Lz,M0, M1,I)
 
         y1 = y[:,0].reshape(3,1)
-        print(f"this is y1 {y1}")
-        # give to optimization
-        # try:
-        #     path , y , deltau1 , k = simCon3(x0,y1,A,B,C,N_sim,Omega,Psi,Lz,M0, M1)
-        #     y1 = y[:,0]
-        #     print(f"this is y1 {y1}")
-        # except Exception as e:
-        #     print(f"An error occurred: {str(e)}")
-        #     path[0] = -100
+        # print(f"this is path {path}")
 
-        # make the command
         cmd = []
-        if path[0]!= -100 and len(path)>1:
+        if path[0][0]!= -100 and len(path[0])>1:
             i=0
-            for point in path:
-                cmd.append(point[-1])
+            for point in path[0]:
+                cmd.append(point)
                 i+=1
                 if i>5:
                     break
