@@ -46,7 +46,7 @@ for _ in range(50):
     K_lidar = np.dot(np.dot(P_hat, H_lidar.T), np.linalg.inv(np.dot(np.dot(H_lidar, P_hat), H_lidar.T) + R_lidar))
 
     # Update using both measurements
-    x = x_hat + 0.5*np.dot(K_lidar, (z_lidar - np.dot(H_lidar, x_hat))) +  0.5*np.dot(K_odometry, (z_odometry - np.dot(H_odo, x_hat)))
+    x = x_hat + K_lidar/(K_lidar + K_odometry)*np.dot(K_lidar, (z_lidar - np.dot(H_lidar, x_hat))) +  K_odometry/(K_lidar + K_odometry)*np.dot(K_odometry, (z_odometry - np.dot(H_odo, x_hat)))
     P = P_hat - 0.5*np.dot(np.dot(K_lidar , H_lidar), P_hat)  - 0.5*np.dot(np.dot(K_odometry , H_odo), P_hat)
 
     # Simulate new measurements (replace this with actual sensor readings)
