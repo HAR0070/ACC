@@ -14,6 +14,9 @@ warnings.filterwarnings('ignore')
 from scipy.signal import cont2discrete
 import time
 import sys
+import matplotlib.pyplot as plt
+
+plt.ion()
 
 
 from controller import Supervisor
@@ -23,6 +26,28 @@ def rnd(number, precision=3):
         return round(number, precision)
     if isinstance(number , np.ndarray):
         return np.round(number, precision)
+
+def kalman(A,B,x,P,u,z_odometry):
+
+    H_odo = np.array([[1 , 0],[0,1]])  # Measurement matrix for odometry
+
+    R_odometry = np.array([[0.1, 0],
+                           [0, 0.2]])  # Odometry measurement noise covariance
+
+    Q = np.array([[0.1, 0],
+                  [0, 0.01]]) # Define process noise covariance
+
+    # Prediction
+    x_hat = np.dot(A, x) + np.dot(B, u)
+    P_hat = np.dot(np.dot(A, P), A.T) + Q
+
+    # Kalman Gain for odometry
+    K_odometry = np.dot(np.dot(P_hat, H_odo.T), np.linalg.inv(np.dot(np.dot(H_odo, P_hat), H_odo.T) + R_odometry))
+    # Update using both measurements
+    x = x_hat +  np.dot(K_odometry, (z_odometry - np.dot(H_odo, x_hat)))
+    P = P_hat - np.dot(np.dot(K_odometry , H_odo), P_hat)
+
+    return x , P
 
 def lagd(a, N):
     v = np.zeros(N)
@@ -198,8 +223,8 @@ def simCon3(xm, y, Ae, Be, Ce, N_sim, Omega, Psi, Lzerot, M0, M1):
 
     u_max = 2.5
     u_min = -3.5
-    delu_min = -5
-    delu_max = 3.5
+    delu_min = -1
+    delu_max = 1
     Nc = 15   # number of steps on which limit has to be imposed
     M = np.vstack((M0,-M0,M1, -M1))
 
@@ -235,6 +260,8 @@ def simCon3(xm, y, Ae, Be, Ce, N_sim, Omega, Psi, Lzerot, M0, M1):
         xm_old = xm.copy()
         xm = Ae@xm + Be@u
         y = Ce@xm
+        # plt.figure("computed accel")
+        # plt.scatter(kk,xm[2])
         # xf = (Ae - Be@Kmpc) @ xf + Be @ Ke @ yr #xf = Ae @ xf + Be @ deltau
         # y = Ce @ xf
 
@@ -242,6 +269,9 @@ def simCon3(xm, y, Ae, Be, Ce, N_sim, Omega, Psi, Lzerot, M0, M1):
         xf = np.vstack((xm - xm_old, y - yr)) #Xf = np.vstack((xm - xm_old, y - sp[:, kk + 1]))
 
     k = np.arange(N_sim)
+
+    # plt.figure("computed U")
+    # plt.plot(k,u1)
 
     return u1, y1, deltau1, k
 
@@ -259,7 +289,7 @@ brake = 0
 
 ## Parameters
 T_eng =  0.460 #0.26  #
-K_eng = 0.732
+K_eng = 0.732 #0.732
 A_f = -1/T_eng
 B_f = K_eng/T_eng
 C = np.eye(3)
@@ -274,12 +304,15 @@ B = np.array([[0], [0], [B_f]])
 sys2 = cont2discrete((A,B, C, 0), Ts, method='zoh')
 A, B, C, D , dt = sys2
 
+Ak = A[1:,1:]
+Bk = B[1:]
+
 m1,n1 = C.shape  # m1 = 3, n1 = 3
 n1,n_in = B.shape  # n_in = 1
 
-a1 = 0.6  #0.6 and weight 10*Ce@Ce and R - 1, a = 5 - 7  ( 7 is slow, 5 is fast response)
-N1 = 4
-Np = 100
+a1 = 0.85  #0.6 and weight 10*Ce@Ce and R - 1, a = 5 - 7  ( 7 is slow, 5 is fast response)
+N1 = 7
+Np = 40
 
 a = [a1]
 N = [N1]
@@ -296,9 +329,9 @@ Ce[:,n1:n1+m1] = np.eye(m1,m1)
 
 # Q1 = np.transpose(C)@C
 
-Q = 14*np.transpose(Ce)@Ce
+Q = np.transpose(Ce)@Ce
 print(Q.shape)
-R = 1*np.eye(1,1)
+R = 0.8*np.eye(1,1)
 
 # Initialize variables
 N_sim = 20
@@ -313,37 +346,45 @@ M0 = Mu(a, N,Nc,n_in)
 _, Lz = lagd(a[0], N[0])
 alpha = 1.02
 Omega, Psi = dmpc(Ae/alpha, Be/alpha, a, N, Np, Q, R)
+P = np.array([[1, 0],  # Initial velocity covariance
+              [0, 1]]) # Initial accel covariance
 
 message = ''
 
 y1 = np.array([[50], [10], [2]])
 path = [-100]
 failure_iter  = 0
+point_index = 0
+x0 = np.array([0,0,0])
+x0 = x0.reshape(3,1)
+command = np.array([0])
 
 while supervisor.step(TIME_STEP) != -1:
+    point_index +=1
     # recive the data
     # print("this is sup Q length",receiver.getQueueLength())
     if receiver.getQueueLength() > 0:
         message = receiver.getBytes()
+        x_prev = x0
         x0 = rnd(np.frombuffer(message, dtype=np.float64))
-        print(f"this is x0 from supervisor  {x0} and shape {x0.shape} ")
         x0 = x0.reshape(3,1)
         receiver.nextPacket()
+        # plt.figure("del D")
+        # plt.scatter(point_index,x0[0])
 
+        # plt.figure("accel")
+        # plt.scatter(point_index,x0[2])
+
+        xk , P = kalman(Ak, Bk, x_prev[1:],P,command[0],x0[1:])
+        x0 = np.array([x0[0], *xk])
+        x0 = x0.reshape(3,1)
         path , y , deltau1 , k = simCon3(x0,y1,A,B,C,N_sim,Omega,Psi,Lz,M0, M1)
 
-        y1 = y[:,0].reshape(3,1)
-        print(f"this is y1 {y1}")
-        # give to optimization
-        # try:
-        #     path , y , deltau1 , k = simCon3(x0,y1,A,B,C,N_sim,Omega,Psi,Lz,M0, M1)
-        #     y1 = y[:,0]
-        #     print(f"this is y1 {y1}")
-        # except Exception as e:
-        #     print(f"An error occurred: {str(e)}")
-        #     path[0] = -100
+        # plt.show()
+        # plt.pause(0.1)
 
-        # make the command
+        y1 = y[:,0].reshape(3,1)
+
         cmd = []
         if path[0]!= -100 and len(path)>1:
             i=0
@@ -355,8 +396,6 @@ while supervisor.step(TIME_STEP) != -1:
         else:
             cmd = -100
             failure_iter += 1
-            print(f"this is failure iter {failure_iter}")
-
 
         command = np.array(cmd)
         message = command.tobytes()
