@@ -10,6 +10,8 @@ from scipy.signal import cont2discrete
 import time
 import sys
 import math
+import matplotlib.pyplot as plt
+plt.ion()
 
 
 flag = 0
@@ -29,8 +31,8 @@ class var():
         self.vx = 0
         self.vy = 0
         self.ax = 0
-        self.a_cmd = 0 # commanded acceleration and velocity
-        self.v_cmd = 0
+        self.a_cmd = np.array([]) # commanded acceleration and velocity
+        self.v_cmd = np.array([])
 
         self.x0 = np.array([0,0,0]) # mpc states
         self.host = np.array([0,0,0]) # host states
@@ -38,7 +40,10 @@ class var():
         self.y1 = np.array([0,0,0])
         self.t = 0
         self.u = 0
-        self.dt = 0.05  # seconds
+        self.dt = 0.1  # seconds
+        var.tag =True
+        var.iter = 0
+        var.i = 0
 
 def rnd(number, precision=3):
     if isinstance(number, (int, float)):
@@ -208,10 +213,10 @@ def simCon3(xm, y, Ae, Be, Ce, N_sim, Omega, Psi, Lzerot, M0, M1):
     n_in = 1
     Lzerot = Lzerot.reshape(-1,1)
 
-    u_max = 2.5
-    u_min = -3.5
-    delu_min = -5
-    delu_max = 3.5
+    u_max = 2
+    u_min = -2
+    delu_min = -2
+    delu_max = 2
     Nc = 15   # number of steps on which limit has to be imposed
     M = np.vstack((M0,-M0,M1, -M1))
 
@@ -247,6 +252,9 @@ def simCon3(xm, y, Ae, Be, Ce, N_sim, Omega, Psi, Lzerot, M0, M1):
         xm_old = xm.copy()
         xm = Ae@xm + Be@u
         y = Ce@xm
+
+        plt.figure("computed accel")
+        plt.scatter(kk,xm[2])
         # xf = (Ae - Be@Kmpc) @ xf + Be @ Ke @ yr #xf = Ae @ xf + Be @ deltau
         # y = Ce @ xf
 
@@ -254,6 +262,9 @@ def simCon3(xm, y, Ae, Be, Ce, N_sim, Omega, Psi, Lzerot, M0, M1):
         xf = np.vstack((xm - xm_old, y - yr)) #Xf = np.vstack((xm - xm_old, y - sp[:, kk + 1]))
 
     k = np.arange(N_sim)
+    plt.figure("computed u")
+    plt.plot(k,u1)
+
 
     return u1, y1, deltau1, k
 
@@ -287,8 +298,8 @@ get_filtered_acel.prevTime = np.array([0,0])
 var = var()
 
 
-T_eng =  0.460 #0.26  #
-K_eng = 0.732/4
+T_eng =  0.2 #0.26  #
+K_eng = 0.6
 A_f = -1/T_eng
 B_f = K_eng/T_eng
 C = np.eye(3)
@@ -305,8 +316,8 @@ A, B, C, D , dt = sys2
 m1,n1 = C.shape  # m1 = 3, n1 = 3
 n1,n_in = B.shape  # n_in = 1
 
-a1 = 0.6  #0.6 and weight 10*Ce@Ce and R - 1, a = 5 - 7  ( 7 is slow, 5 is fast response)
-N1 = 8
+a1 = 0.7  #0.6 and weight 10*Ce@Ce and R - 1, a = 5 - 7  ( 7 is slow, 5 is fast response)
+N1 = 7
 Np = 40
 
 a = [a1]
@@ -324,8 +335,8 @@ Ce[:,n1:n1+m1] = np.eye(m1,m1)
 
 # Q1 = np.transpose(C)@C
 
-Q = 14*np.transpose(Ce)@Ce
-R = 1*np.eye(1,1)
+Q = 5*np.transpose(Ce)@Ce
+R = 2*np.eye(1,1)
 
 # Initialize variables
 N_sim = Np
@@ -357,26 +368,27 @@ def solve():
     d_c = var.x0[0] - d0 - T_hw*var.vx
     x0 = np.asarray([d_c, var.x0[1], var.x0[2]])
     x0 = x0.reshape(3,1)
-    path , y , deltau1 , k = simCon3(x0,y1,A,B,C,N_sim,Omega,Psi,Lz,M0, M1)
+    path , y , _ , _ = simCon3(x0,y1,A,B,C,N_sim,Omega,Psi,Lz,M0, M1)
     var.y1 = y[:,0].reshape(3,1)
     #print(f"this is y1 {y1}")
 
     cmd = []
     if path[0]!= -100 and len(path)>1:
+        
         i=0
         for point in path:
             cmd.append(point[-1])
             i+=1
             if i>5:
                 break
+        var.tag = True
     else:
             cmd = -100
             failure_iter += 1
             print(f"this is failure iter {failure_iter}")
 
-    var.a_cmd = cmd[0]
-    var.v_cmd = var.vx + var.a_cmd*var.dt
-    publish_cmd()
+    var.a_cmd = np.array(cmd)
+    var.tag = True
 
 def pose_callback(data):
     var.vx = data.twist.twist.linear.x
@@ -422,16 +434,27 @@ def publish_cmd():
     rate = rospy.Rate(int(1/var.dt))  # this is in hertz
     #print("publishing")
     twist = Twist()
-    twist.linear.x = var.v_cmd
-    rospy.loginfo(var.v_cmd)
-    print(f"published data {var.v_cmd}")
-    pub.publish(twist)
+    if var.tag == True:
+        var.iter = 0
+    
+    if var.iter <=5:
+        ax = var.a_cmd[var.iter]
+        var.v_cmd = var.vx + ax*var.dt
+        twist.linear.x = var.v_cmd + 0.2
+        i = var.i
+        plt.figure("commanded velocity")
+        plt.scatter(i,var.v_cmd)
+        rospy.loginfo(var.v_cmd)
+        print(f"published data {var.v_cmd}")
+        pub.publish(twist)
+        var.iter +=1
 
 def main():
     y1 = var.x0.reshape(3,1)
     while not rospy.is_shutdown():
+        if var.x0[0] < 0.2:
+            break
         var.ref = np.array([5,0,0])
-
         try:
             data = rospy.wait_for_message('/RosAria/pose', Odometry, timeout=20)
             var.x = data.pose.pose.position.x
@@ -446,9 +469,24 @@ def main():
         speed_filter()
         get_filtered_acel()
         var.host = np.array([var.x , var.vx , var.ax])
-        var.x0 = np.array([(var.ref[0] - var.x) , (var.ref[1]-var.vx), -var.ax])
+        var.x0 = np.array([(var.ref[0] - var.x) , (var.ref[1]-var.vx), var.ax])
         print(f"now going to solve {var.x0}")
-        solve()
+        if var.tag == True:
+            solve()
+        publish_cmd()
+        i = var.i
+        plt.figure("del D")
+        plt.scatter(i,var.x0[0])
+
+        plt.figure("velocity")
+        plt.scatter(i, var.vx)
+
+        # plt.figure("accel")
+        # plt.figure(i,var.x0[2])
+        var.i +=1
+
+        plt.show()
+        plt.pause(0.001)
     rospy.spin()
 
 if __name__ == '__main__':
