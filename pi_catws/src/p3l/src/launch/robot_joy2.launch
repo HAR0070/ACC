@@ -1,0 +1,30 @@
+<launch>
+  
+  <node name="RosAria" pkg="rosaria" type="RosAria">
+     <param name="port" value="/dev/ttyUSB0" />
+  </node>
+
+  <node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode" output="screen">
+  <param name="serial_port"         type="string" value="/dev/ttyUSB1"/>
+  <param name="serial_baudrate"     type="int"    value="115200"/><!--A1/A2 -->
+  <param name="frame_id"            type="string" value="laser"/>
+  <param name="inverted"            type="bool"   value="false"/>
+  <param name="angle_compensate"    type="bool"   value="true"/>
+  </node>
+  
+</launch>
+
+<!-- rplidar_with_tf.launch -->
+
+<launch>
+  <!-- Launch the rplidarNode -->
+  <include file="$(find rplidar_ros)/launch/rplidar.launch" />
+
+  <!-- Publish TF transforms for the RPLIDAR -->
+  <node pkg="tf" type="static_transform_publisher" name="rplidar_transform" args="0 0 0 0 0 0 /base_link /laser_frame 100" />
+
+  <!-- Robot State Publisher -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
+
+</launch>
+

@@ -1,0 +1,7 @@
+digraph G {
+"odom" -> "base_link"[label="Broadcaster: /RosAria\nAverage rate: 10.200 Hz\nMost recent transform: 1702853018.364 ( 0.049 sec old)\nBuffer length: 4.902 sec\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1702853018.412"[ shape=plaintext ] ;
+ }->"odom";
+}
