@@ -1,0 +1,5 @@
+        # for Intelligent driver model 
+        d_c = -xr_d + xh 
+        v_host = vh
+        v_ref = xr_v
+        xc = rnd(np.array([[d_c], [v_host], [v_ref]]))
