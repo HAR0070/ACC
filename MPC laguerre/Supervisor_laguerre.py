@@ -202,11 +202,17 @@ def simCon3(xm, u, y, yr, A1, A2, B1 , B2, C, N_sim, Omega1, Omega2, Psi1, Psi2,
     n_in = 1
     Lzerot = Lzerot.reshape(-1,1)
 
+    ###
+    ## This has to move to YAML File
+    ###
     u_max = 2.5
     u_min = -3.5
     delu_min = -5
     delu_max = 3.5
     Nc = 15   # number of steps on which limit has to be imposed
+    
+    
+    
     M = np.vstack((M0,-M0,M1, -M1))
     M = M@I
 
@@ -226,9 +232,10 @@ def simCon3(xm, u, y, yr, A1, A2, B1 , B2, C, N_sim, Omega1, Omega2, Psi1, Psi2,
             eta = QPHild(Omega1, Psi1@xm, M, gamma)
         elif u < 0:
             eta = QPHild(Omega2, Psi2@xm, M, gamma)
+            
         # Kmpc = np.transpose(Lzerot) @ np.linalg.solve(Omega, Psi)
         # Ke = Kmpc[0,3:6].reshape(1,-1)
-        deltau = np.transpose(Lzerot) @ eta   #
+        deltau = np.transpose(Lzerot) @ eta  
         if deltau[0] > delu_max:
             deltau[0] = delu_max
         if deltau[0] < delu_min:
