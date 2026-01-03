@@ -1,0 +1,51 @@
+
+debug:
+  enable: true
+
+time:
+  DT: 0.05  ## 20 Hz sampling time 
+  headway_time : 10  # in seconds 
+
+Dist:
+  min_dist: 3  # in meters 
+
+# This is basic parameters for ACC state space matrix 
+acc:
+    t1: 0.732
+    k1: 0.26
+    a_max: 2.0   #m/s 
+    a_min: 0.0
+    del_a_max: 0.1
+
+brake:
+    k2: 0.973
+    t2: 0.193 
+    b_max: 4 #m/s   
+    b_min: 0.0
+    del_b_max: 0.1
+
+weights:
+    # q1: 1.0   # weight for distance error
+    # q2: 1.0   # weight for velocity error
+    # q3: 0.1   # weight for acceleration 
+    # r1: 0.01  # weight for jerk
+    r_brake: 0.1  # relative weight on brake jerk
+    r_accel: 0.1 # weight for accel jerk
+
+
+# Time delay params 
+
+
+
+# Cost function parameters 
+windup:
+    x4: 10  # integral anti windup limit for distance error
+    x5: 3   # windup limit for velocity error
+    x6: 2   # for accel error
+
+
+
+# Parameter confidence intervals 
+
+
+    

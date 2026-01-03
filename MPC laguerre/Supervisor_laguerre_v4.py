@@ -56,7 +56,7 @@ def lagd(a, N):
     Lo[0] = 1
 
     for k in range(1, N):
-        v[k] = ((-a) ** (k - 1)) * (1 - a * a)
+        v[k] = ((-a) ** (k - 1))    
         Lo[k] = (-a) ** (k)
 
     Lo = np.sqrt((1 - a * a)) * Lo
@@ -68,6 +68,67 @@ def lagd(a, N):
         A[:, i] = np.concatenate([np.zeros(i), v[0:N - i]])
     # print(Lo)
     return A, Lo
+
+def Mu(a, N, Nc, n_in=1):
+    # Amplitude constrain matrix  (U) 
+    N_pa = np.sum(N)
+    M = np.zeros((n_in, N_pa))
+    M_du1 = np.zeros((n_in, N_pa))
+    k0 = 0
+    Al, L0 = lagd(a[k0], N[k0])
+    M_du1[k0, :N[k0]] = np.transpose(L0)
+    cc = N[k0]
+
+    for k0 in range(1, n_in):
+        Al, L0 = lagd(a[k0], N[k0])
+        M_du1[k0, cc:cc+N[k0]] = np.transpose(L0)
+        cc += N[k0]
+
+    M1 = np.copy(M_du1)
+    M = np.copy(M_du1)
+
+    for kk in range(1, Nc):
+        k0 = 0
+        Al, L0 = lagd(a[k0], N[k0])
+        L = np.linalg.matrix_power(Al, kk-1) @ L0
+        M_du1[k0, :N[k0]] = np.transpose(L)
+        cc = N[k0]
+
+        M = M + M_du1
+        M1 = np.vstack((M1, M))
+
+    return M1
+
+def Mdu(a, N, Nc, n_in=1):
+    # delta u constrain matrix 
+    
+    N_pa = np.sum(N)
+    M = np.zeros((n_in, N_pa))
+    M_du1 = np.zeros((n_in, N_pa))
+    k0 = 0
+    Al, L0 = lagd(a[k0], N[k0])
+    M_du1[k0, :N[k0]] = np.transpose(L0)
+    cc = N[k0]
+
+    for k0 in range(1, n_in):
+        Al, L0 = lagd(a[k0], N[k0])
+        M_du1[k0, cc:cc+N[k0]] = np.transpose(L0)
+        cc += N[k0]
+
+    Lzerot = np.copy(M_du1)
+    M = np.copy(M_du1)
+
+    for kk in range(2, Nc+1):
+        k0 = 0
+        Al, L0 = lagd(a[k0], N[k0])
+        L = np.linalg.matrix_power(Al, kk-1) @ L0
+        M_du1[k0, :N[k0]] = np.transpose(L)
+        cc = N[k0]
+
+        M = np.vstack((M, M_du1))
+
+    return M, Lzerot
+
 
 def dmpc(Ae, Be, a, N, Np, Q, R):
     #Ae and Be are the matrices of the augmented system when integrator is used
@@ -114,34 +175,6 @@ def dmpc(Ae, Be, a, N, Np, Q, R):
 
     return E,H
 
-def Mdu(a, N, Nc, n_in=1):
-    N_pa = np.sum(N)
-    M = np.zeros((n_in, N_pa))
-    M_du1 = np.zeros((n_in, N_pa))
-    k0 = 0
-    Al, L0 = lagd(a[k0], N[k0])
-    M_du1[k0, :N[k0]] = np.transpose(L0)
-    cc = N[k0]
-
-    for k0 in range(1, n_in):
-        Al, L0 = lagd(a[k0], N[k0])
-        M_du1[k0, cc:cc+N[k0]] = np.transpose(L0)
-        cc += N[k0]
-
-    Lzerot = np.copy(M_du1)
-    M = np.copy(M_du1)
-
-    for kk in range(2, Nc+1):
-        k0 = 0
-        Al, L0 = lagd(a[k0], N[k0])
-        L = np.linalg.matrix_power(Al, kk-1) @ L0
-        M_du1[k0, :N[k0]] = np.transpose(L)
-        cc = N[k0]
-
-        M = np.vstack((M, M_du1))
-
-    return M, Lzerot
-
 def QPHild(E, F, M, gamma):
     # inputs are H f A_cons b  in order
     # Determine which constraints are active and which are inactive
@@ -182,35 +215,6 @@ def QPHild(E, F, M, gamma):
 
     eta = eta  - np.dot(np.linalg.solve(E, M.T), lam)
     return eta
-
-def Mu(a, N, Nc, n_in=1):
-    N_pa = np.sum(N)
-    M = np.zeros((n_in, N_pa))
-    M_du1 = np.zeros((n_in, N_pa))
-    k0 = 0
-    Al, L0 = lagd(a[k0], N[k0])
-    M_du1[k0, :N[k0]] = np.transpose(L0)
-    cc = N[k0]
-
-    for k0 in range(1, n_in):
-        Al, L0 = lagd(a[k0], N[k0])
-        M_du1[k0, cc:cc+N[k0]] = np.transpose(L0)
-        cc += N[k0]
-
-    M1 = np.copy(M_du1)
-    M = np.copy(M_du1)
-
-    for kk in range(1, Nc):
-        k0 = 0
-        Al, L0 = lagd(a[k0], N[k0])
-        L = np.linalg.matrix_power(Al, kk-1) @ L0
-        M_du1[k0, :N[k0]] = np.transpose(L)
-        cc = N[k0]
-
-        M = M + M_du1
-        M1 = np.vstack((M1, M))
-
-    return M1
 
 ## Constrints are clamping type
 def simCon3(xm,y, A1, A2, B1 , B2, C, N_sim, Omega1, Omega2, Psi1, Psi2, Lzerot, M0, M1):
@@ -253,6 +257,7 @@ def simCon3(xm,y, A1, A2, B1 , B2, C, N_sim, Omega1, Omega2, Psi1, Psi2, Lzerot,
             deltau[0] = delu_max
         if deltau[0] < delu_min:
             deltau[0] = delu_min
+            
         u += deltau
         if u[0] > u_max:
             u[0] = u_max
@@ -342,24 +347,26 @@ Ce[:,n1:n1+m1] = np.eye(m1,m1)
 
 Ae1 = np.eye(n1+m1,n1+m1)
 Ae1[0:n1,0:n1] = A1
-Ae1[n1:n1+m1,0:n1] = C@A1
+# Ae1[n1:n1+m1,0:n1] = C@A1
+Ae1[n1:n1+m1,0:n1] = C
 Be1 = np.zeros((n1+m1,n_in))
 Be1[0:n1,:] = B1
-Be1[n1:n1+m1,:] = C@B1
+# Be1[n1:n1+m1,:] = C@B1
 
 Ae2 = np.eye(n1+m1,n1+m1)
 Ae2[0:n1,0:n1] = A2
-Ae2[n1:n1+m1,0:n1] = C@A2
+# Ae2[n1:n1+m1,0:n1] = C@A2
+Ae2[n1:n1+m1,0:n1] = C
 Be2 = np.zeros((n1+m1,n_in))
 Be2[0:n1,:] = B2
-Be2[n1:n1+m1,:] = C@B2
+# Be2[n1:n1+m1,:] = C@B2
 
 
 Q1 = 1.4*np.transpose(Ce)@Ce
 Q2 = 0.8*np.transpose(Ce)@Ce
 # print(Q.shape)
 R1 = 0.8*np.eye(1,1)
-R2 = 1.4*np.eye(1,1)
+R2 = 1.4*np.eye(1,1) 
 
 # Initialize variables
 N_sim = 20
