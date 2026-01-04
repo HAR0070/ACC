@@ -511,11 +511,11 @@ class StateSpaceModel
 
         // dimensions 
         OSQPInt n = L.N; // Number of variables (N)
-        OSQPInt m = L.Nc; // Number of constraints
+        OSQPInt m = 2*L.Nc; // Number of constraints
 
         OSQPData P_data = eigenToOSQP(L.E, true);  // Hessian - converting to upper triangular
 
-        MatrixXf M (2*L.Nc , L.Mu.cols()); 
+        MatrixXf M (m , L.Mu.cols()); 
         M << L.Mdu , L.Mu; 
         OSQPData A_data = eigenToOSQP(M, false); // Constrain matrix 
 
