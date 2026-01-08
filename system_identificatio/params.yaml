@@ -3,49 +3,43 @@ debug:
   enable: true
 
 time:
-  DT: 0.05  ## 20 Hz sampling time 
-  headway_time : 10  # in seconds 
+  DT: 0.05  ## 20 Hz sampling time
+  headway_time : 0.5  # in seconds  # Make sure feedback considers correct value
 
 Dist:
-  min_dist: 3  # in meters 
+  min_dist: 2  # in meters   - not used in mpc code
 
-# This is basic parameters for ACC state space matrix 
+# This is basic parameters for ACC state space matrix
 acc:
-    t1: 0.732
-    k1: 0.26
-    a_max: 2.0   #m/s 
-    a_min: 0.0
+    t1: 0.1
+    k1: 2       # Steady state of 1st order step input
+    a_max: 1   #m/s
+    a_min: -1
     del_a_max: 0.1
 
 brake:
-    k2: 0.973
-    t2: 0.193 
-    b_max: 4 #m/s   
-    b_min: 0.0
+    k2: 3  #0.9       # Steady state of 1st order step input
+    t2: 0.1           # time constant of  "" ""
+    b_max: 1 #m/s
+    b_min: -1
     del_b_max: 0.1
 
 weights:
-    # q1: 1.0   # weight for distance error
-    # q2: 1.0   # weight for velocity error
-    # q3: 0.1   # weight for acceleration 
+    q1: 1.2   # weight for distance error
+    q2: 0.5   # weight for velocity error
+    q3: 1.5   # weight for acceleration
     # r1: 0.01  # weight for jerk
-    r_brake: 0.1  # relative weight on brake jerk
-    r_accel: 0.1 # weight for accel jerk
+    r_brake: 1  # relative weight on brake jerk
+    r_accel: 1 # weight for accel jerk
 
 
-# Time delay params 
+# Time delay params
 
 
-
-# Cost function parameters 
+# Cost function parameters
 windup:
     x4: 10  # integral anti windup limit for distance error
     x5: 3   # windup limit for velocity error
     x6: 2   # for accel error
 
-
-
-# Parameter confidence intervals 
-
-
-    
+# Parameter confidence intervals

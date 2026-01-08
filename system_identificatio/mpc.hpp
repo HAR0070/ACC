@@ -3,20 +3,42 @@
 #include <Eigen/Dense>
 #include <unsupported/Eigen/MatrixFunctions>
 #include <vector>
-#include <Eigen/Eigenvalues> 
+#include <Eigen/Eigenvalues>
 #include <Eigen/Sparse>
 
 
 #include <iostream>
 #include <math.h>
 #include <array>
+#include <tuple>
 
-#include <yaml-cpp/yaml.h> 
+#include <yaml-cpp/yaml.h>
 #include <iostream>
 #include <stdexcept> // Recommended for standard exceptions
 
+#pragma once
 
-using namespace Eigen; 
+/*
+
+This implementation is taken from
+[Advances in Industrial Control ] Liuping Wang (auth.) - Model Predictive Control System Design and Implementation Using MATLAB® (2009, Springer) [10.1007_978-1-84882-331-0]
+LINK - https://www.researchgate.net/profile/Mohamed-Mourad-Lafifi/post/How_to_design_model_predictive_controller_in_a_factory/attachment/5d2dae0b3843b0b9825ae2b9/AS%3A781245130735617%401563274762980/download/Model+Predictive+Control+System+Design+and+Implementation+Using+MATLAB_Wang.pdf
+
+The state space eqn is of the velocity form   and not position form
+ie state space eqn looks like  eqn 1.5  in page 5 of book
+Notice the states -  augmented matrix X  = [dx , x]T
+
+So be aware of the feedback form
+
+*/
+
+using namespace Eigen;
+// using Eigen::MatrixXd;
+// using Eigen::MatrixXf;
+// using Eigen::VectorXcf;
+// using Eigen::VectorXd;
+// using Eigen::Matrix;
+// using Eigen::Dynamic;
 
 // Defining state space matrix and related identification functions
 class StateSpaceModel
@@ -24,30 +46,30 @@ class StateSpaceModel
     private:
 
     struct params{
-        float DT; 
-        float d0; 
-        float Th; 
-        float a_max; 
-        float b_max; 
-        float del_a_max; 
+        float DT;
+        float d0;
+        float Th;
+        float a_max;
+        float b_max;
+        float del_a_max;
         float del_b_max;
-        float t1; 
-        float k1; 
-        float k2; 
+        float t1;
+        float k1;
+        float k2;
         float t2;
         bool debug;
         float ra;
         float rb;
-        float wx4;   // not weight - its windup error limit
-        float wx5; 
-        float wx6; 
+        float q1;   // not weight - its windup error limit
+        float q2;
+        float q3;
     };
 
     struct models{
-        MatrixXf A; 
-        MatrixXf B; 
-        MatrixXf C; 
-        MatrixXf Q; 
+        MatrixXf A;
+        MatrixXf B;
+        MatrixXf C;
+        MatrixXf Q;
         MatrixXf R;
 
         // default constructor while initializing
@@ -71,15 +93,15 @@ class StateSpaceModel
 
         MatrixXf L0;
         MatrixXf A1;
-        MatrixXf Mu; 
-        MatrixXf Mdu; 
+        MatrixXf Mu;
+        MatrixXf Mdu;
         MatrixXf M;
         MatrixXf L0t;
         MatrixXf E;
-        MatrixXf H;     // doesnt change with iteration 
-        MatrixXf h;     // Changes every iteration 
-        // MatrixXf Eta;   // doesnt change with iteration 
-        MatrixXf eta;   // Changes every iteration 
+        MatrixXf H;     // doesnt change with iteration
+        MatrixXf h;     // Changes every iteration
+        // MatrixXf Eta;   // doesnt change with iteration
+        MatrixXf eta;   // Changes every iteration
     };
 
     struct OSQPData {
@@ -97,7 +119,7 @@ class StateSpaceModel
     public:
 
     StateSpaceModel(){
-        YAML::Node config  = YAML::LoadFile("params.yaml"); 
+        YAML::Node config  = YAML::LoadFile("params.yaml");
 
         try{
             p.DT        = config["time"]["DT"].as<float>();
@@ -115,13 +137,13 @@ class StateSpaceModel
             p.rb        = config["weights"]["r_accel"].as<float>();
             // p.debug     = (config["debug"]["enable"].as<std::string>() == "true") ? true : false;
             p.debug     = config["debug"]["enable"].as<bool>();
-            p.wx4       = config["windup"]["x4"].as<float>();
-            p.wx5       = config["windup"]["x5"].as<float>();
-            p.wx6       = config["windup"]["x6"].as<float>();
+            p.q1        = config["weights"]["q1"].as<float>();
+            p.q2        = config["weights"]["q2"].as<float>();
+            p.q3        = config["weights"]["q3"].as<float>();
         }
         catch (const YAML::Exception& e) {
             std::cerr << "Error loading configuration: " << e.what() << std::endl;
-            std::exit(EXIT_FAILURE); 
+            std::exit(EXIT_FAILURE);
         }
     }
 
@@ -132,74 +154,107 @@ class StateSpaceModel
         StateSpaceModel::models b_aug( 6 , 1 , 3);
 
         a_ss.A <<  0 , 1, -p.Th ,
-                    0 , 0 , -1, 
+                    0 , 0 , -1,
                     0 , 0 , -1/p.t1;
-        a_ss.B << 0 , 0 , -p.k1/p.t1 ; 
+        a_ss.B << 0 , 0 , p.k1/p.t1 ;
         a_ss.C = MatrixXf::Identity(3,3);
 
         b_ss.A <<  0 , 1, -p.Th ,
-                    0 , 0 , -1, 
+                    0 , 0 , -1,
                     0 , 0 , -1/p.t2;
-        b_ss.B << 0 , 0 , -p.k2/p.t2 ; 
+        b_ss.B << 0 , 0 , p.k2/p.t2 ;
         b_ss.C = MatrixXf::Identity(3,3);
 
+        // Cost matrix
+        DiagonalMatrix<float,3> q (p.q1 , p.q2 , p.q3);
+        a_ss.Q = q;
+        b_ss.Q = q;
+
         // ZOH Discretization
-        MatrixXf M (4 , 4); 
+        MatrixXf M (4 , 4);
         M.setZero();
         M.block(0,0,3,3) = a_ss.A * p.DT;
-        M.block(0,3,3,1) = a_ss.B * p.DT; 
-        
-        MatrixXf Md = M.exp(); 
+        M.block(0,3,3,1) = a_ss.B * p.DT;
+
+        MatrixXf Md = M.exp();
         a_ss.A = Md.block(0,0,3,3);
-        a_ss.B = Md.block(0,3,3,1); 
+        a_ss.B = Md.block(0,3,3,1);
 
         // Augmenting the system for integral error
         a_aug.A = MatrixXf::Identity(6,6);
-        a_aug.B = MatrixXf::Zero(6,1); 
+        a_aug.B = MatrixXf::Zero(6,1);
         a_aug.C = MatrixXf::Zero(3,6);
 
         a_aug.A.block(0,0,3,3) = a_ss.A;
-        a_aug.A.block(3,0,3,3) = a_ss.C * a_ss.A; 
+        a_aug.A.block(3,0,3,3) = a_ss.C * a_ss.A;
 
-        a_aug.B.block(0,0,3,1) = a_ss.B; 
+        a_aug.B.block(0,0,3,1) = a_ss.B;
         a_aug.B.block(3,0,3,1) = a_ss.C * a_ss.B;
 
-        a_aug.C.block(0,0,3,3) = a_ss.C; 
+        a_aug.C.block(0,3,3,3) = a_ss.C;
 
-        a_aug.R << p.ra ; 
-        a_aug.Q = a_aug.C.transpose() * a_aug.C;
+        a_aug.R << p.ra ;
+        a_aug.Q = a_aug.C.transpose()* a_ss.Q * a_aug.C;
 
         // Same for brake system
         // ZOH Discretization
         M.setZero();
         M.block(0,0,3,3) = b_ss.A * p.DT;
-        M.block(0,3,3,1) = b_ss.B * p.DT; 
-        
-        Md = M.exp(); 
+        M.block(0,3,3,1) = b_ss.B * p.DT;
+
+        Md = M.exp();
         b_ss.A = Md.block(0,0,3,3);
-        b_ss.B = Md.block(0,3,3,1); 
+        b_ss.B = Md.block(0,3,3,1);
 
         // Augmenting the system for integral error
         b_aug.A = MatrixXf::Identity(6,6);
-        b_aug.B = MatrixXf::Zero(6,1); 
+        b_aug.B = MatrixXf::Zero(6,1);
         b_aug.C = MatrixXf::Zero(3,6);
 
         b_aug.A.block(0,0,3,3) = b_ss.A;
-        b_aug.A.block(3,0,3,3) = b_ss.C * b_ss.A; 
+        b_aug.A.block(3,0,3,3) = b_ss.C * b_ss.A;
 
-        b_aug.B.block(0,0,3,1) = b_ss.B; 
+        b_aug.B.block(0,0,3,1) = b_ss.B;
         b_aug.B.block(3,0,3,1) = b_ss.C * b_ss.B;
 
-        b_aug.C.block(0,0,3,3) = b_ss.C; 
-        b_aug.R << p.rb ; 
-        b_aug.Q = b_aug.C.transpose() * b_aug.C;
+        b_aug.C.block(0,3,3,3) = b_ss.C;
+        b_aug.R << p.rb ;
+        b_aug.Q = b_aug.C.transpose() * b_ss.Q * b_aug.C;
 
         ss_model.accel = a_aug;
-        ss_model.brake = b_aug;    
+        ss_model.brake = b_aug;
 
         if (p.debug){
+            std::cout << "\n================================================================" << std::endl;
+            std::cout << "DEBUG: MPC FORMULATION IS AUGMENTED (Velocity Form)" << std::endl;
+            std::cout << "================================================================" << std::endl;
+
+            std::cout << "\nEXPECTED INPUT FORMAT (X0 vector):" << std::endl;
+            std::cout << "The controller expects a 6x1 state vector in the following order:" << std::endl;
+            std::cout << "X = [ Δd, Δv, Δah, d_err, v_err, ah_err ]^T" << std::endl;
+            std::cout << "Where:" << std::endl;
+            std::cout << "  Δd, Δv, Δah  : Change in states (Current - Previous)" << std::endl;
+            std::cout << "  d_err, v_err : Current tracking errors" << std::endl;
+            std::cout << "  ah_err       : Current ego acceleration" << std::endl;
+            std::cout << "----------------------------------------------------------------\n" << std::endl;
+
+            // Printing Acceleration Matrices
+            std::cout << "ACCELERATION MODEL - AUGMENTED A MATRIX (6x6):" << std::endl;
+            std::cout << ss_model.accel.A << std::endl;
+            std::cout << "\nACCELERATION MODEL - AUGMENTED B MATRIX (6x1):" << std::endl;
+            std::cout << ss_model.accel.B << std::endl;
+
+            std::cout << "\n----------------------------------------------------------------" << std::endl;
+
+            // Printing Brake Matrices
+            std::cout << "BRAKE MODEL - AUGMENTED A MATRIX (6x6):" << std::endl;
+            std::cout << ss_model.brake.A << std::endl;
+            std::cout << "\nBRAKE MODEL - AUGMENTED B MATRIX (6x1):" << std::endl;
+            std::cout << ss_model.brake.B << std::endl;
             std::cout << "Acceleration Model A: \n" << a_ss.A << "\n B: \n" << a_ss.B << "\n C: \n" << a_ss.C << std::endl;
             std::cout << "Brake Model A: \n" << b_ss.A << "\n B: \n" << b_ss.B << "\n C: \n" << b_ss.C << std::endl;
+
+            std::cout << "\n================================================================\n" << std::endl;
 
             compute_eigenvalues(a_ss.A);
             check_controllability(a_ss.A , a_ss.B);
@@ -208,9 +263,6 @@ class StateSpaceModel
             compute_eigenvalues(b_ss.A);
             check_controllability(b_ss.A , b_ss.B);
             check_observability(b_ss.A , b_ss.C);
-
-            std::cout << "Acceleration Model A: \n" << ss_model.accel.A << "\n B: \n" << ss_model.accel.B << "\n C: \n" << ss_model.accel.C << std::endl;
-            std::cout << "Brake Model A: \n" << ss_model.brake.A << "\n B: \n" << ss_model.brake.B << "\n C: \n" << ss_model.brake.C << std::endl;
 
             compute_eigenvalues(ss_model.accel.A);
             check_controllability(ss_model.accel.A , ss_model.accel.B);
@@ -225,7 +277,7 @@ class StateSpaceModel
     }
 
     void compute_eigenvalues(const MatrixXf &A) {
-        EigenSolver<MatrixXf> es(A);
+        Eigen::EigenSolver<MatrixXf> es(A);
         VectorXcf eigvals = es.eigenvalues();
 
         std::cout << "Eigenvalues of the system matrix A:\n";
@@ -244,7 +296,7 @@ class StateSpaceModel
             Ob.block(i*C.rows() , 0 ,C.rows() , n) = Ob.block((i-1)*C.rows(), 0 ,C.rows() , n)*A;
         }
 
-        FullPivLU<MatrixXf> lu_decomp(Ob);
+        Eigen::FullPivLU<MatrixXf> lu_decomp(Ob);
         int rank = lu_decomp.rank();
 
         if (rank == n){
@@ -265,7 +317,7 @@ class StateSpaceModel
         Co.block(0 , i*B.cols() , n , B.cols()) = A.pow(i) * B;
         }
 
-        FullPivLU<MatrixXf> lu_decomp(Co);
+        Eigen::FullPivLU<MatrixXf> lu_decomp(Co);
         int rank = lu_decomp.rank();
 
         if (rank == n){
@@ -280,32 +332,33 @@ class StateSpaceModel
     void minimal_realisation( MatrixXf &A , MatrixXf &B , MatrixXf &C){
         // To be implemented -- if the model is not controllable or observable
         // Its slightly complex -- will do if req later
-    
+
     }
 
     void get_L0( int N , float a , float Nc , float Np , const std::string &type) {
 
         LaguerreMatrices& L = (type=="accel") ? L_a : L_b;
 
-        L.L0 = MatrixXf::Zero(N,1); 
-        L.a = a; 
+        L.L0 = MatrixXf::Zero(N,1);
+        L.a = a;
         L.N = N;
-        L.Nc = Nc; 
+        L.Nc = Nc;
         L.Np = Np;
 
         for ( int i = 0; i <N; i++){
-            L.L0(i,0) = pow(-a , i); 
+            L.L0(i,0) = pow(-a , i);
         }
         L.L0 = sqrt(1- a*a) * L.L0;
 
         // A1 matrix
         L.A1 = a* MatrixXf::Identity(N,N);
         for (int i = 1; i < N; i++){
-            L.A1.block(i,i-1 , N-i , 1) = L.L0.block(0,0, N-i, 1); 
+            L.A1.block(i,i-1 , N-i , 1) = L.L0.block(0,0, N-i, 1);
         }
 
         if (p.debug){
             std::cout << "Laguerre get_l0 called for type:" << type <<std::endl;
+            std::cout << "Laguerre L0 matrix: \n" << L.L0.rows() << " " << L.L0.cols() << std::endl;
             std::cout << "Laguerre L0 matrix: \n" << L.L0 << std::endl;
             std::cout << "Laguerre A1 matrix: \n" << L.A1 << std::endl;
         }
@@ -313,8 +366,8 @@ class StateSpaceModel
     }
 
     void get_M(const std::string &type){
-        /* 
-        M is the data matrix for imposing constraints on the ﬁrst Nc samples on Δu(ki ). 
+        /*
+        M is the data matrix for imposing constraints on the ﬁrst Nc samples on Δu(ki ).
         The block matrix Lzerot is used for constructing the controlsignal.
 
         First call get_L0 to initialize L0 and A1
@@ -354,7 +407,7 @@ class StateSpaceModel
     }
 
     void dmpc( const std::string & type ){
-        /* 
+        /*
         A_e;B_e define the extended state-space model when
         integrator is used
         %they can also be other forms of state-space models
@@ -363,7 +416,7 @@ class StateSpaceModel
         Np prediction horizon
         Q weight on the state variables
         R weight on the input variables assumed to be diagonal.
-        The cost function is J= eta ^T E eta +2 eta ^T H x(k_i)   -- Here E is the hessian -- Sorry for the naming 
+        The cost function is J= eta ^T E eta +2 eta ^T H x(k_i)   -- Here E is the hessian -- Sorry for the naming
         */
 
         LaguerreMatrices& L = (type=="accel") ? L_a : L_b;
@@ -404,7 +457,7 @@ class StateSpaceModel
 
         /*
         J= eta ^T E eta +2 eta ^T H x(k_i)
-        A_const * eta <= b 
+        A_const * eta <= b
 
         E , H
         l.h = H*X0  or H* x(k_i)
@@ -415,16 +468,16 @@ class StateSpaceModel
 
         LaguerreMatrices& l = (type=="accel") ? L_a : L_b;
 
-        int n1 = l.M.rows() , m1 = l.M.cols(); 
+        int n1 = l.M.rows() , m1 = l.M.cols();
 
         l.eta = -l.E.colPivHouseholderQr().solve(l.h);          // Unconstrained solution
-        int k =0 ; 
+        int k =0 ;
         for(int i = 0; i< n1 ; i++){
             if ((l.M*l.eta)(0,0) > b(i,0)) k++;
         }
 
         if (k != 0) {
-            
+
         MatrixXf P = l.M*(l.E.colPivHouseholderQr().solve(l.M.transpose()));
         MatrixXf d = l.M*(-1*l.eta) + b;
         int n = d.rows() , m = d.cols();
@@ -432,9 +485,9 @@ class StateSpaceModel
         MatrixXf lambda (n ,m); lambda.setZero();
         MatrixXf lambda_p (n ,m);
 
-        int al = 10; 
-        int iters = 40; 
-        /* 
+        int al = 10;
+        int iters = 40;
+        /*
         find the elements in the solution vector one by one
         km could be larger if the Lagranger multiplier has a slow convergence rate.
         */
@@ -443,16 +496,16 @@ class StateSpaceModel
             lambda_p = lambda;
 
             for (int i =0; i< n; i++){
-                float w = (P.row(i)*lambda)(0,0) - P(i,i)*lambda(i,0) + d(i,0); 
+                float w = (P.row(i)*lambda)(0,0) - P(i,i)*lambda(i,0) + d(i,0);
                 float la = -w / P(i,i);
-                lambda(i,0) = std::max(0.0f , la); 
+                lambda(i,0) = std::max(0.0f , la);
             }
 
             al = (lambda - lambda_p).norm();
             if (al < 10e-8) break;
-        } 
+        }
 
-        l.eta = l.eta -l.E.colPivHouseholderQr().solve(l.M.transpose())*lambda; 
+        l.eta = l.eta -l.E.colPivHouseholderQr().solve(l.M.transpose())*lambda;
 
         }
         else{
@@ -474,16 +527,16 @@ class StateSpaceModel
         if (extractUpperTriangular) {
             Matrix<OSQPFloat, Dynamic, Dynamic> temp = mat_double.triangularView<Upper>();
             sparse_mat = temp.sparseView();
-        } else { 
+        } else {
             sparse_mat = mat_double.sparseView();
         }
-        
-        
+
+
         sparse_mat.makeCompressed();                        // Ensure it is compressed (CSC format)
 
         // 3. Extract Data
         data.nnz = (OSQPInt)sparse_mat.nonZeros();           // OSQP needs raw arrays. We copy them to vectors to keep them alive.
-        
+
         // Resize vectors
         data.val.resize(data.nnz);
         data.row.resize(data.nnz);
@@ -495,7 +548,7 @@ class StateSpaceModel
             data.val[i] = sparse_mat.valuePtr()[i];
             data.row[i] = (OSQPInt)sparse_mat.innerIndexPtr()[i];
         }
-        
+
         for (int i = 0; i < sparse_mat.outerSize() + 1; ++i) {
             data.col[i] = (OSQPInt)sparse_mat.outerIndexPtr()[i];
         }
@@ -504,22 +557,22 @@ class StateSpaceModel
     }
 
     int OSQP(const std::string &type , const VectorXd &low , const VectorXd &up){
-        /* 
+        /*
         Solver matrix names are according to OSQP naming convention - in their website
         */
-        LaguerreMatrices &L = (type == "accel") ? L_a : L_b; 
+        LaguerreMatrices &L = (type == "accel") ? L_a : L_b;
 
-        // dimensions 
+        // dimensions
         OSQPInt n = L.N; // Number of variables (N)
         OSQPInt m = 2*L.Nc; // Number of constraints
 
         OSQPData P_data = eigenToOSQP(L.E, true);  // Hessian - converting to upper triangular
 
-        MatrixXf M (m , L.Mu.cols()); 
-        M << L.Mdu , L.Mu; 
-        OSQPData A_data = eigenToOSQP(M, false); // Constrain matrix 
+        MatrixXf M (m , L.Mu.cols());
+        M << L.Mdu , L.Mu;
+        OSQPData A_data = eigenToOSQP(M, false); // Constrain matrix
 
-        // Vector matrixes 
+        // Vector matrixes
         VectorXd q_d = L.h.cast<double>();
         std::vector<OSQPFloat> q(q_d.data(), q_d.data() + q_d.size());
 
@@ -543,7 +596,7 @@ class StateSpaceModel
 
         if (!exitflag) {
             exitflag = osqp_solve(solver);
-            
+
             // If solved successfully (or solved inaccurately which is often fine)
             if (exitflag == 0 || exitflag == 1) {
                 L.eta = MatrixXf::Zero(n , 1);
@@ -570,112 +623,112 @@ class StateSpaceModel
 
         // make the laguerre L0 for both accel and brake - based on N and a
         // get constrain matrix - no additional params req
-        // make the dmpc matrix - for accel and brake each 
+        // make the dmpc matrix - for accel and brake each
 
         make_ss();      // make state space for both accel and brake - parameters are in yaml file
 
-        // accel init 
+        // accel init
         if(p.debug){
             std::cout<<" accel params " << a[0] << " " << N[0] << " " << Nc[0] << " " << Np[0] << std::endl;
             std::cout<<" brake params " << a[1] << " " << N[1] << " " << Nc[1] << " "  << Np[0] << std::endl;
             std::cout<<" make sure the integral error is feed into the state space" << std::endl;
         }
 
-        std::vector<std::string> mode = {"accel" , "brake"}; 
+        std::vector<std::string> mode = {"accel" , "brake"};
 
         for(int i = 0 ; i < 2; i++){
-            get_L0(N[i], a[i], Nc[i] , Np[i] , mode[i]); 
-            get_M(mode[i]); 
+            get_L0(N[i], a[i], Nc[i] , Np[i] , mode[i]);
+            get_M(mode[i]);
             dmpc(mode[i]);
         }
 
     }
-    
+
     float mpc_qph(std::vector<float> fb){
-    
+
     // fb - [0] = u of previous step and the rest - x0 states
-    float u = fb[0]; 
+    float u = fb[0];
     MatrixXf X0 (6,1);
     LaguerreMatrices* l;
 
-    // Integral error 
-    if (fb[4] > p.wx4) fb[4] = p.wx4; 
-    if (fb[5] > p.wx5) fb[5] = p.wx5; 
-    if (fb[6] > p.wx6) fb[6] = p.wx6; 
+    float del_u = 0;
+    std::string mode;
 
-    X0 << fb[1] , fb[2] , fb[3] , fb[4] , fb[5], fb[6];   // Reference is 0 - we still need integrator because model errs 
+    X0 << fb[1] , fb[2] , fb[3] , fb[4] , fb[5], fb[6];   // Reference is 0 - we still need integrator because model errs
     // Error integrator will be done at user end of this code
 
-    if (u > 0) {
-        l = &L_a; 
+    if (u >= 0) {
+        l = &L_a;
         std::string mode = "accel" ;
-        MatrixXf gamma (l->Nc*4 , 1); 
-        MatrixXf ones = MatrixXf::Ones(l->Nc , 1); 
-        l->h = l->H*X0; 
+        MatrixXf gamma (l->Nc*4 , 1);
+        MatrixXf ones = MatrixXf::Ones(l->Nc , 1);
+        l->h = l->H*X0;
         gamma << ones*p.del_a_max , ones*(-p.del_a_max) , ones*(p.a_max - u) , ones*(-p.a_max + u);
         QPHild( mode , gamma );
     }
     else {
         l = &L_b;
         std::string mode = "brake" ;
-        MatrixXf gamma (l->Nc*4 , 1); 
-        MatrixXf ones = MatrixXf::Ones(l->Nc , 1); 
-        l->h = l->H*X0; 
+        MatrixXf gamma (l->Nc*4 , 1);
+        MatrixXf ones = MatrixXf::Ones(l->Nc , 1);
+        l->h = l->H*X0;
         gamma << ones*p.del_b_max , ones*(-p.del_b_max) , ones*(p.b_max - u) , ones*(-p.b_max +u);
         QPHild( mode , gamma );
-    } 
+    }
 
-    float del_u = (l->L0t*l->eta)(0,0); 
+    del_u = (l->L0t*l->eta)(0,0);
 
-    return u + del_u; 
+    if (p.debug){
+        std::cout<< "del_u" << del_u << " " << l->L0t*l->eta << std::endl;
+        }
+
+    return u + del_u;
 
     }
 
-    float mpc_osqp(std::vector<float> fb){
-    
+    std::tuple<std::string , float> mpc_osqp(std::vector<float> fb){
+
     // fb - [0] = u of previous step and the rest - x0 states
-    float u = fb[0]; 
+    float u = fb[0];
     MatrixXf X0 (6,1);
     LaguerreMatrices* l;
-    int exitflag ; 
+    int exitflag ;
     float del_u = 0;
+    std::string mode;
 
-    // Integral error 
-    if (fb[4] > p.wx4) fb[4] = p.wx4; 
-    if (fb[5] > p.wx5) fb[5] = p.wx5; 
-    if (fb[6] > p.wx6) fb[6] = p.wx6; 
+    X0 << fb[1] , fb[2] , fb[3] , fb[4] , fb[5], fb[6];
 
-    X0 << fb[1] , fb[2] , fb[3] , fb[4] , fb[5], fb[6];   // Reference is 0 - we still need integrator because model errs 
-    // Error integrator will be done at user end of this code
-
-    if (u > 0) {
-        l = &L_a; 
-        std::string mode = "accel" ;
-        VectorXd low (l->Nc*2); 
-        VectorXd up (l->Nc*2); 
-        VectorXd ones = VectorXd::Ones(l->Nc); 
-        l->h = l->H*X0; 
+    if (u >= 0) {
+        l = &L_a;
+        mode = "accel" ;
+        VectorXd low (l->Nc*2);
+        VectorXd up (l->Nc*2);
+        VectorXd ones = VectorXd::Ones(l->Nc);
+        l->h = l->H*X0;
         low << -ones*p.del_a_max , ones*(-p.a_max + u);
         up << ones*p.del_a_max , ones*(p.a_max - u);
         exitflag = OSQP( mode , low , up );
     }
     else {
         l = &L_b;
-        std::string mode = "brake" ;
-        VectorXd low (l->Nc*2); 
-        VectorXd up (l->Nc*2); 
-        VectorXd ones = VectorXd::Ones(l->Nc); 
-        l->h = l->H*X0;  
+        mode = "brake" ;
+        VectorXd low (l->Nc*2);
+        VectorXd up (l->Nc*2);
+        VectorXd ones = VectorXd::Ones(l->Nc);
+        l->h = l->H*X0;
         low << ones*(-p.del_b_max) , ones*(-p.b_max +u);
         up << ones*p.del_b_max ,ones*(p.b_max - u);
         exitflag = OSQP( mode , low , up );
-    }     
+    }
 
-    if (p.debug) std::cout<< "exitflag is " << exitflag << std::endl;
+    if (exitflag == 0 || exitflag == 1) del_u = (l->L0t*l->eta)(0,0);
 
-    if (exitflag == 0 || exitflag == 1) del_u = (l->L0t*l->eta)(0,0); 
+        if (p.debug){
+          std::cout<< "exitflag is " << exitflag << std::endl;
+          std::cout<< "del_u" << del_u << " " << l->L0t*l->eta << std::endl;
+        }
 
-    return u + del_u; 
+    return std::make_tuple(mode , u + del_u) ;
 
     }
 
