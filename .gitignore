@@ -17,3 +17,5 @@ parts/
 sdist/
 var/
 Kalman-and-Bayesian-Filters-in-Python/
+
+step_input*
