@@ -45,7 +45,8 @@ public:
         }
 
         if (debug) {
-
+            LOG(INFO) << "baud are " << baudrates[0] << baudrates[1]; 
+            
         }
 
         device_handle = ZCAN_OpenDevice(DEVICE_TYPE, 0, 0);
@@ -58,7 +59,8 @@ public:
         for(int i=0; i<2; i++) {
             ZCAN_SetResistanceEnable(device_handle, i, 1);
             ZCAN_SetAbitBaud(device_handle, i, baudrates[i]);
-            ZCAN_SetDbitBaud(device_handle, i, 2000000);
+            ZCAN_SetDbitBaud(device_handle, i, 5000000);
+            ZCAN_SetCANFDStandard(device_handle, i, 0);
 
             ZCAN_CHANNEL_INIT_CONFIG cfg;
             memset(&cfg, 0, sizeof(cfg));
@@ -82,9 +84,9 @@ public:
     // Returns ALL messages in buffer
     std::vector<CanMessage> read_all_messages(int channel_idx) {
         std::vector<CanMessage> output;
-        ZCAN_Receive_Data rx_msgs[100];
+        ZCAN_Receive_Data rx_msgs[2000];
 
-        int num_rx = ZCAN_Receive(ch_handles[channel_idx], rx_msgs, 100, 0);
+        int num_rx = ZCAN_Receive(ch_handles[channel_idx], rx_msgs, 2000, 0);
 
         for (int i = 0; i < num_rx; i++) {
             CanMessage msg;

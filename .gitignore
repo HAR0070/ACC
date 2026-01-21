@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 venv/
 .venv/
 __pycache__/
@@ -19,3 +20,14 @@ var/
 Kalman-and-Bayesian-Filters-in-Python/
 
 step_input*
+=======
+build/
+install/
+log/
+logs/
+
+build/*
+install/*
+log/*
+logs/*
+>>>>>>> a9ce8cf (working radar v0 only 1 point a time)

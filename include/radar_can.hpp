@@ -45,6 +45,14 @@ public:
 
         // Temporary map to merge Subframe A (pos) and Subframe B (height)
         // Key: Object ID, Value: RadarPoint
+
+        // if (msgs.empty()) {
+        //     // No new data from radar? 
+        //     // 1. Don't clear current_points (keeps RViz stable)
+        //     // 2. Don't try to parse (prevents empty debug loops)
+        //     return; 
+        // }
+
         std::map<int, RadarPoint> point_map;
 
         for (const auto& msg : msgs) {
@@ -98,19 +106,27 @@ public:
                     point_map[obj_id].rcs = rcs_val;
                     point_map[obj_id].has_position = true;
 
+                    if(debug){
+                        LOG(INFO) << "found point" << long_dist << " " << lat_dist;
+                    }
+
                 }
                 else if (frame_code == 1) {
                     // --- Frame 1 (Subframe B): Height (Z) page: 39] ---
                     // Height (Z):
                     float z_height = ((d[1] << 2) | (d[2] >> 6)) * 0.1f - 30.0f;
 
+                    // if(debug) LOG(INFO) << "Z height is " << z_height; 
+
                     point_map[obj_id].z = z_height;
                 }
             }
         }
 
-        current_points.clear();
+        // current_points.clear();   RADAR MIGHT BE SENSING DATA AT LOW FREQ
+
         for (auto const& [id, point] : point_map) {
+            current_points.clear();
             // Only add points that received at least Frame 0 (Position)
             if (point.has_position) {
                 current_points.push_back(point);

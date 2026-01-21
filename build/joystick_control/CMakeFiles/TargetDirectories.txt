@@ -1,9 +1,0 @@
-/home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control/CMakeFiles/uninstall.dir
-/home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control/CMakeFiles/joystick_control_uninstall.dir
-/home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control/CMakeFiles/test.dir
-/home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control/CMakeFiles/edit_cache.dir
-/home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control/CMakeFiles/rebuild_cache.dir
-/home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control/CMakeFiles/list_install_components.dir
-/home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control/CMakeFiles/install.dir
-/home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control/CMakeFiles/install/local.dir
-/home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control/CMakeFiles/install/strip.dir

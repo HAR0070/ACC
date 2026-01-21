@@ -1,1 +1,0 @@
-/home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control/ament_cmake_core/joystick_controlConfig.cmake
