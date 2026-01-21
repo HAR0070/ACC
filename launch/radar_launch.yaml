@@ -1,0 +1,14 @@
+
+launch:
+
+- node:
+    pkg: "radar_ros"
+    exec: "radar_ros_node"
+    name: "radar1"
+    namespace: "radar"
+
+- node:
+    pkg: "rviz2"
+    exec: "rviz2"
+    name: "rviz2"
+    args: "-d /home/har/Documents/Auto_drive/SR75/x86-c/rviz/point_cloud_rviz.rviz"

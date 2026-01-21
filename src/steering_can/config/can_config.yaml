@@ -7,7 +7,7 @@ can1:
   baud_rate: 1000000 
 
 can2:
-  baud_rate: 500000
+  baud_rate: 1000000
 
 radar:
   debug: true

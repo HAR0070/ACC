@@ -11,6 +11,8 @@ struct RadarPoint {
     float x;
     float y;
     float z;
+    float vx;
+    float vy;
     float velocity;
     float rcs; // Signal Strength (dB)
     bool has_position; // Flag to ensure we have at least Frame 0
@@ -21,6 +23,10 @@ private:
     can_handler* driver;
     int can_line;
     bool debug;
+
+    // Temporary map to merge Subframe A (pos) and Subframe B (height)
+    // Until the next 0x600 frame comes - signalling completetion of 1 cycle
+    std::map<int, RadarPoint> point_map;
 
 public:
     // This buffer holds the points from the latest update
@@ -43,21 +49,25 @@ public:
     void update_radar() {
         std::vector<CanMessage> msgs = driver->read_all_messages(can_line);
 
-        // Temporary map to merge Subframe A (pos) and Subframe B (height)
-        // Key: Object ID, Value: RadarPoint
-
-        // if (msgs.empty()) {
-        //     // No new data from radar? 
-        //     // 1. Don't clear current_points (keeps RViz stable)
-        //     // 2. Don't try to parse (prevents empty debug loops)
-        //     return; 
-        // }
-
-        std::map<int, RadarPoint> point_map;
-
         for (const auto& msg : msgs) {
-            // ID 0x600: Header (Number of objects) [cite: 1254]
+            // ID 0x600: Point cloud status information 
+            // This message comes when 1 cycle is completed 
+            // so till then its the previous cycles points in the buffer
             if (msg.id == 0x600) {
+                for (auto const& [id, point] : point_map) {
+                    current_points.clear();
+                    // Only add points that received at least Frame 0 (Position)
+                    if (point.has_position) {
+                        current_points.push_back(point);
+                        if(debug) {
+                            LOG(INFO) << "Obj " << id << " [X:" << point.x << " Y:" << point.y
+                                    << " Z:" << point.z << " RCS:" << point.rcs << "]";
+                        }
+                    }
+                }
+                // clear for next cycle 
+                point_map.clear(); 
+
                 if (debug && msg.data.size() > 0) {
                     LOG(INFO) << "Radar Detect Header: " << (int)msg.data[0] << " objects";
                 }
@@ -102,39 +112,25 @@ public:
 
                     point_map[obj_id].x = long_dist;
                     point_map[obj_id].y = lat_dist;
+                    point_map[obj_id].vx = long_speed;
+                    point_map[obj_id].vy = lat_speed;
                     point_map[obj_id].velocity = std::sqrt(long_speed*long_speed + lat_speed*lat_speed);
                     point_map[obj_id].rcs = rcs_val;
                     point_map[obj_id].has_position = true;
 
-                    if(debug){
-                        LOG(INFO) << "found point" << long_dist << " " << lat_dist;
-                    }
+                    // if(debug){
+                    //     LOG(INFO) << "found point" << long_dist << " " << lat_dist;
+                    // }
 
                 }
                 else if (frame_code == 1) {
                     // --- Frame 1 (Subframe B): Height (Z) page: 39] ---
                     // Height (Z):
                     float z_height = ((d[1] << 2) | (d[2] >> 6)) * 0.1f - 30.0f;
-
-                    // if(debug) LOG(INFO) << "Z height is " << z_height; 
-
                     point_map[obj_id].z = z_height;
                 }
             }
         }
-
-        // current_points.clear();   RADAR MIGHT BE SENSING DATA AT LOW FREQ
-
-        for (auto const& [id, point] : point_map) {
-            current_points.clear();
-            // Only add points that received at least Frame 0 (Position)
-            if (point.has_position) {
-                current_points.push_back(point);
-                if(debug) {
-                    LOG(INFO) << "Obj " << id << " [X:" << point.x << " Y:" << point.y
-                            << " Z:" << point.z << " RCS:" << point.rcs << "]";
-                }
-            }
-        }
+        
     }
 };

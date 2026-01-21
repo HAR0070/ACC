@@ -48,18 +48,19 @@ private:
         cloud_msg.header.stamp = this->now();
         cloud_msg.header.frame_id = "radar_link" ;   // fixed frame id for rviz
 
-
         cloud_msg.height = 1;
         cloud_msg.width = radar_driver_->current_points.size();  // number of points at each instance
         cloud_msg.is_bigendian = false;
         cloud_msg.is_dense = false;
 
-
         sensor_msgs::PointCloud2Modifier modifier(cloud_msg);  // to modify as a container
-        modifier.setPointCloud2Fields ( 5,
+        modifier.setPointCloud2Fields ( 6,
+        "id" , 1 , sensor_msgs::msg::PointField::INT8,
         "x" , 1 , sensor_msgs::msg::PointField::FLOAT32,   // for one msg , there is 1 point of float32
         "y" , 1 , sensor_msgs::msg::PointField::FLOAT32,
         "z" , 1 , sensor_msgs::msg::PointField::FLOAT32,
+        "vx" , 1 , sensor_msgs::msg::PointField::FLOAT32,
+        "vy" , 1 , sensor_msgs::msg::PointField::FLOAT32,
         "intensity" , 1 , sensor_msgs::msg::PointField::FLOAT32,
         "velocity" , 1 , sensor_msgs::msg::PointField::FLOAT32);
 
@@ -67,16 +68,22 @@ private:
 
 
         // Now filling all the messages in  radar_driver_->current_points
+        sensor_msgs::PointCloud2Iterator<int> iter_id(cloud_msg, "id");
         sensor_msgs::PointCloud2Iterator<float> iter_x(cloud_msg, "x");
         sensor_msgs::PointCloud2Iterator<float> iter_y(cloud_msg, "y");
         sensor_msgs::PointCloud2Iterator<float> iter_z(cloud_msg, "z");
+        sensor_msgs::PointCloud2Iterator<float> iter_vx(cloud_msg, "vx");
+        sensor_msgs::PointCloud2Iterator<float> iter_vy(cloud_msg, "vy");
         sensor_msgs::PointCloud2Iterator<float> iter_intensity(cloud_msg, "intensity");
         sensor_msgs::PointCloud2Iterator<float> iter_velocity(cloud_msg, "velocity");
 
         for (const auto &elem : radar_driver_->current_points){
+            *iter_id = elem.id; ++iter_id;
             *iter_x = elem.x;   ++iter_x;
             *iter_y = elem.y;   ++ iter_y;
             *iter_z = elem.z;   ++iter_z;
+            *iter_vx = elem.vx;   ++ iter_vx;
+            *iter_vy = elem.vy;   ++iter_vy;
             *iter_intensity = elem.rcs;   ++iter_intensity;
             *iter_velocity = elem.velocity;     ++iter_velocity;
 
