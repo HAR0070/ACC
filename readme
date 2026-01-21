@@ -1,0 +1,62 @@
+
+First we will test this code with controller 
+
+Then use it with the main driver 
+
+Keep in min -- Ak80  uses extended can id and feedback is in 298 id
+
+The radar uses FMCW ie transmittion signal freq changes over time - 
+    - beat frequency formed by delayed echo gives the range 
+    - Doppler shift gives the velocity   -- ie you are getting relative speed
+    So both are independently measured 
+Radar gives a 4D point cloud 
+
+Distance resolution is 0.1m   precesion is +-0.05m
+
+Speed range +-18m/s   speed ratio 0.25m/s   precesion +- 0.12m/s
+
+operation freq is 100ms 
+
+Link to datasheet - https://robu.in/wp-content/uploads/2024/11/R164169-SR75-77GHz-Technical-White-Paper.pdf
+
+
+If steering feedback is not comming the run main.cpp  and c which feedback id is being ued -- since its hardcoded right now to 2968 
+
+Testing
+1. Steering
+2. Feedback from vehicle
+3. Throttle and brake 
+4. Radar 
+
+
+x86-c/
+├── include/                  # Shared headers & libs
+│   ├── controlcanfd.h
+│   ├── can.hpp
+│   ├── vehicle_can.hpp
+│   ├── steering_can.hpp
+│   ├── radar_can.hpp
+│   └── libcontrolcanfd.so
+├── src/
+│   ├── vehicle_interface/    # Package 1
+│   │   ├── CMakeLists.txt
+│   │   ├── package.xml
+│   │   └── vehicle_interface.cpp
+│   ├── joystick/             # Package 2 (Python)
+│   │   ├── CMakeLists.txt
+│   │   ├── package.xml
+│   │   └── joystick.py
+│   ├── ros_radar/            # Package 3
+│   │   ├── CMakeLists.txt
+│   │   ├── package.xml
+│   │   └── radar_ros.cpp
+│   └── steering/             # Package 4
+│       ├── CMakeLists.txt
+│       ├── package.xml
+│       └── main.cpp
+
+
+TO access the USB port in linux - you must create a udev rule -- by default without root privilage u cant access
+sudo nano /etc/udev/rules.d/99-canfd.rules
+
+SUBSYSTEM=="usb", ATTR{idVendor}=="04d8", ATTR{idProduct}=="0053", MODE="0666"

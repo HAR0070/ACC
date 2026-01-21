@@ -1,0 +1,313 @@
+[0.369s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build', '--symlink-install']
+[0.369s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=True, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=16, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, verb_parser=<colcon_defaults.argument_parser.defaults.DefaultArgumentsDecorator object at 0x7370c2821fd0>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x7370c2ff4800>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x7370c2ff4800>>)
+[0.437s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.437s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.437s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.437s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.437s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[0.437s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.437s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/har/Documents/Auto_drive/SR75/x86-c'
+[0.437s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[0.437s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[0.438s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[0.438s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[0.438s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[0.438s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[0.438s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[0.438s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[0.438s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[0.490s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['cmake', 'python']
+[0.490s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'cmake'
+[0.490s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python'
+[0.490s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['python_setup_py']
+[0.490s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python_setup_py'
+[0.490s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extensions ['ignore', 'ignore_ament_install']
+[0.490s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extension 'ignore'
+[0.490s] Level 1:colcon.colcon_core.package_identification:_identify(build) ignored
+[0.491s] Level 1:colcon.colcon_core.package_identification:_identify(include) by extensions ['ignore', 'ignore_ament_install']
+[0.491s] Level 1:colcon.colcon_core.package_identification:_identify(include) by extension 'ignore'
+[0.491s] Level 1:colcon.colcon_core.package_identification:_identify(include) by extension 'ignore_ament_install'
+[0.491s] Level 1:colcon.colcon_core.package_identification:_identify(include) by extensions ['colcon_pkg']
+[0.491s] Level 1:colcon.colcon_core.package_identification:_identify(include) by extension 'colcon_pkg'
+[0.491s] Level 1:colcon.colcon_core.package_identification:_identify(include) by extensions ['colcon_meta']
+[0.491s] Level 1:colcon.colcon_core.package_identification:_identify(include) by extension 'colcon_meta'
+[0.491s] Level 1:colcon.colcon_core.package_identification:_identify(include) by extensions ['ros']
+[0.491s] Level 1:colcon.colcon_core.package_identification:_identify(include) by extension 'ros'
+[0.491s] Level 1:colcon.colcon_core.package_identification:_identify(include) by extensions ['cmake', 'python']
+[0.491s] Level 1:colcon.colcon_core.package_identification:_identify(include) by extension 'cmake'
+[0.491s] Level 1:colcon.colcon_core.package_identification:_identify(include) by extension 'python'
+[0.492s] Level 1:colcon.colcon_core.package_identification:_identify(include) by extensions ['python_setup_py']
+[0.492s] Level 1:colcon.colcon_core.package_identification:_identify(include) by extension 'python_setup_py'
+[0.492s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extensions ['ignore', 'ignore_ament_install']
+[0.492s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extension 'ignore'
+[0.492s] Level 1:colcon.colcon_core.package_identification:_identify(install) ignored
+[0.492s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extensions ['ignore', 'ignore_ament_install']
+[0.492s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extension 'ignore'
+[0.492s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extension 'ignore_ament_install'
+[0.492s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extensions ['colcon_pkg']
+[0.492s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extension 'colcon_pkg'
+[0.492s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extensions ['colcon_meta']
+[0.492s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extension 'colcon_meta'
+[0.492s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extensions ['ros']
+[0.492s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extension 'ros'
+[0.493s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extensions ['cmake', 'python']
+[0.493s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extension 'cmake'
+[0.493s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extension 'python'
+[0.493s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extensions ['python_setup_py']
+[0.493s] Level 1:colcon.colcon_core.package_identification:_identify(launch) by extension 'python_setup_py'
+[0.493s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extensions ['ignore', 'ignore_ament_install']
+[0.493s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extension 'ignore'
+[0.493s] Level 1:colcon.colcon_core.package_identification:_identify(log) ignored
+[0.493s] Level 1:colcon.colcon_core.package_identification:_identify(logs) by extensions ['ignore', 'ignore_ament_install']
+[0.493s] Level 1:colcon.colcon_core.package_identification:_identify(logs) by extension 'ignore'
+[0.493s] Level 1:colcon.colcon_core.package_identification:_identify(logs) by extension 'ignore_ament_install'
+[0.493s] Level 1:colcon.colcon_core.package_identification:_identify(logs) by extensions ['colcon_pkg']
+[0.493s] Level 1:colcon.colcon_core.package_identification:_identify(logs) by extension 'colcon_pkg'
+[0.494s] Level 1:colcon.colcon_core.package_identification:_identify(logs) by extensions ['colcon_meta']
+[0.494s] Level 1:colcon.colcon_core.package_identification:_identify(logs) by extension 'colcon_meta'
+[0.494s] Level 1:colcon.colcon_core.package_identification:_identify(logs) by extensions ['ros']
+[0.494s] Level 1:colcon.colcon_core.package_identification:_identify(logs) by extension 'ros'
+[0.494s] Level 1:colcon.colcon_core.package_identification:_identify(logs) by extensions ['cmake', 'python']
+[0.494s] Level 1:colcon.colcon_core.package_identification:_identify(logs) by extension 'cmake'
+[0.494s] Level 1:colcon.colcon_core.package_identification:_identify(logs) by extension 'python'
+[0.494s] Level 1:colcon.colcon_core.package_identification:_identify(logs) by extensions ['python_setup_py']
+[0.494s] Level 1:colcon.colcon_core.package_identification:_identify(logs) by extension 'python_setup_py'
+[0.494s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['ignore', 'ignore_ament_install']
+[0.494s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ignore'
+[0.494s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ignore_ament_install'
+[0.494s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['colcon_pkg']
+[0.494s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'colcon_pkg'
+[0.494s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['colcon_meta']
+[0.494s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'colcon_meta'
+[0.495s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['ros']
+[0.495s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ros'
+[0.495s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['cmake', 'python']
+[0.495s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'cmake'
+[0.495s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'python'
+[0.495s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['python_setup_py']
+[0.495s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'python_setup_py'
+[0.495s] Level 1:colcon.colcon_core.package_identification:_identify(src/joystick) by extensions ['ignore', 'ignore_ament_install']
+[0.495s] Level 1:colcon.colcon_core.package_identification:_identify(src/joystick) by extension 'ignore'
+[0.495s] Level 1:colcon.colcon_core.package_identification:_identify(src/joystick) by extension 'ignore_ament_install'
+[0.495s] Level 1:colcon.colcon_core.package_identification:_identify(src/joystick) by extensions ['colcon_pkg']
+[0.495s] Level 1:colcon.colcon_core.package_identification:_identify(src/joystick) by extension 'colcon_pkg'
+[0.495s] Level 1:colcon.colcon_core.package_identification:_identify(src/joystick) by extensions ['colcon_meta']
+[0.495s] Level 1:colcon.colcon_core.package_identification:_identify(src/joystick) by extension 'colcon_meta'
+[0.495s] Level 1:colcon.colcon_core.package_identification:_identify(src/joystick) by extensions ['ros']
+[0.496s] Level 1:colcon.colcon_core.package_identification:_identify(src/joystick) by extension 'ros'
+[0.502s] DEBUG:colcon.colcon_core.package_identification:Package 'src/joystick' with type 'ros.ament_cmake' and name 'joystick_control'
+[0.502s] Level 1:colcon.colcon_core.package_identification:_identify(src/steering_can) by extensions ['ignore', 'ignore_ament_install']
+[0.502s] Level 1:colcon.colcon_core.package_identification:_identify(src/steering_can) by extension 'ignore'
+[0.502s] Level 1:colcon.colcon_core.package_identification:_identify(src/steering_can) by extension 'ignore_ament_install'
+[0.502s] Level 1:colcon.colcon_core.package_identification:_identify(src/steering_can) by extensions ['colcon_pkg']
+[0.502s] Level 1:colcon.colcon_core.package_identification:_identify(src/steering_can) by extension 'colcon_pkg'
+[0.503s] Level 1:colcon.colcon_core.package_identification:_identify(src/steering_can) by extensions ['colcon_meta']
+[0.503s] Level 1:colcon.colcon_core.package_identification:_identify(src/steering_can) by extension 'colcon_meta'
+[0.503s] Level 1:colcon.colcon_core.package_identification:_identify(src/steering_can) by extensions ['ros']
+[0.503s] Level 1:colcon.colcon_core.package_identification:_identify(src/steering_can) by extension 'ros'
+[0.504s] DEBUG:colcon.colcon_core.package_identification:Package 'src/steering_can' with type 'ros.ament_cmake' and name 'steering_can'
+[0.504s] Level 1:colcon.colcon_core.package_identification:_identify(src/vehicle_interface) by extensions ['ignore', 'ignore_ament_install']
+[0.504s] Level 1:colcon.colcon_core.package_identification:_identify(src/vehicle_interface) by extension 'ignore'
+[0.504s] Level 1:colcon.colcon_core.package_identification:_identify(src/vehicle_interface) by extension 'ignore_ament_install'
+[0.504s] Level 1:colcon.colcon_core.package_identification:_identify(src/vehicle_interface) by extensions ['colcon_pkg']
+[0.505s] Level 1:colcon.colcon_core.package_identification:_identify(src/vehicle_interface) by extension 'colcon_pkg'
+[0.505s] Level 1:colcon.colcon_core.package_identification:_identify(src/vehicle_interface) by extensions ['colcon_meta']
+[0.505s] Level 1:colcon.colcon_core.package_identification:_identify(src/vehicle_interface) by extension 'colcon_meta'
+[0.505s] Level 1:colcon.colcon_core.package_identification:_identify(src/vehicle_interface) by extensions ['ros']
+[0.505s] Level 1:colcon.colcon_core.package_identification:_identify(src/vehicle_interface) by extension 'ros'
+[0.506s] DEBUG:colcon.colcon_core.package_identification:Package 'src/vehicle_interface' with type 'ros.ament_cmake' and name 'vehicle_interface'
+[0.506s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[0.506s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[0.506s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[0.506s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[0.506s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[0.539s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) check parameters
+[0.539s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) discover
+[0.545s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 3 installed packages in /home/har/Documents/Auto_drive/SR75/x86-c/install
+[0.546s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 12 installed packages in /home/har/Documents/VNAV/lab4/install
+[0.547s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 10 installed packages in /home/har/Documents/VNAV/lab3/install
+[0.550s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 288 installed packages in /opt/ros/jazzy
+[0.551s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) using defaults
+[0.620s] Level 5:colcon.colcon_core.verb:set package 'joystick_control' build argument 'cmake_args' from command line to 'None'
+[0.620s] Level 5:colcon.colcon_core.verb:set package 'joystick_control' build argument 'cmake_target' from command line to 'None'
+[0.620s] Level 5:colcon.colcon_core.verb:set package 'joystick_control' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.620s] Level 5:colcon.colcon_core.verb:set package 'joystick_control' build argument 'cmake_clean_cache' from command line to 'False'
+[0.620s] Level 5:colcon.colcon_core.verb:set package 'joystick_control' build argument 'cmake_clean_first' from command line to 'False'
+[0.620s] Level 5:colcon.colcon_core.verb:set package 'joystick_control' build argument 'cmake_force_configure' from command line to 'False'
+[0.620s] Level 5:colcon.colcon_core.verb:set package 'joystick_control' build argument 'ament_cmake_args' from command line to 'None'
+[0.621s] Level 5:colcon.colcon_core.verb:set package 'joystick_control' build argument 'catkin_cmake_args' from command line to 'None'
+[0.621s] Level 5:colcon.colcon_core.verb:set package 'joystick_control' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.621s] DEBUG:colcon.colcon_core.verb:Building package 'joystick_control' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control', 'merge_install': False, 'path': '/home/har/Documents/Auto_drive/SR75/x86-c/src/joystick', 'symlink_install': True, 'test_result_base': None}
+[0.621s] Level 5:colcon.colcon_core.verb:set package 'steering_can' build argument 'cmake_args' from command line to 'None'
+[0.622s] Level 5:colcon.colcon_core.verb:set package 'steering_can' build argument 'cmake_target' from command line to 'None'
+[0.622s] Level 5:colcon.colcon_core.verb:set package 'steering_can' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.622s] Level 5:colcon.colcon_core.verb:set package 'steering_can' build argument 'cmake_clean_cache' from command line to 'False'
+[0.622s] Level 5:colcon.colcon_core.verb:set package 'steering_can' build argument 'cmake_clean_first' from command line to 'False'
+[0.622s] Level 5:colcon.colcon_core.verb:set package 'steering_can' build argument 'cmake_force_configure' from command line to 'False'
+[0.622s] Level 5:colcon.colcon_core.verb:set package 'steering_can' build argument 'ament_cmake_args' from command line to 'None'
+[0.622s] Level 5:colcon.colcon_core.verb:set package 'steering_can' build argument 'catkin_cmake_args' from command line to 'None'
+[0.622s] Level 5:colcon.colcon_core.verb:set package 'steering_can' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.622s] DEBUG:colcon.colcon_core.verb:Building package 'steering_can' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/har/Documents/Auto_drive/SR75/x86-c/build/steering_can', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can', 'merge_install': False, 'path': '/home/har/Documents/Auto_drive/SR75/x86-c/src/steering_can', 'symlink_install': True, 'test_result_base': None}
+[0.622s] Level 5:colcon.colcon_core.verb:set package 'vehicle_interface' build argument 'cmake_args' from command line to 'None'
+[0.623s] Level 5:colcon.colcon_core.verb:set package 'vehicle_interface' build argument 'cmake_target' from command line to 'None'
+[0.623s] Level 5:colcon.colcon_core.verb:set package 'vehicle_interface' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.623s] Level 5:colcon.colcon_core.verb:set package 'vehicle_interface' build argument 'cmake_clean_cache' from command line to 'False'
+[0.623s] Level 5:colcon.colcon_core.verb:set package 'vehicle_interface' build argument 'cmake_clean_first' from command line to 'False'
+[0.623s] Level 5:colcon.colcon_core.verb:set package 'vehicle_interface' build argument 'cmake_force_configure' from command line to 'False'
+[0.623s] Level 5:colcon.colcon_core.verb:set package 'vehicle_interface' build argument 'ament_cmake_args' from command line to 'None'
+[0.623s] Level 5:colcon.colcon_core.verb:set package 'vehicle_interface' build argument 'catkin_cmake_args' from command line to 'None'
+[0.623s] Level 5:colcon.colcon_core.verb:set package 'vehicle_interface' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.623s] DEBUG:colcon.colcon_core.verb:Building package 'vehicle_interface' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/har/Documents/Auto_drive/SR75/x86-c/build/vehicle_interface', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface', 'merge_install': False, 'path': '/home/har/Documents/Auto_drive/SR75/x86-c/src/vehicle_interface', 'symlink_install': True, 'test_result_base': None}
+[0.623s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[0.625s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[0.625s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/har/Documents/Auto_drive/SR75/x86-c/src/joystick' with build type 'ament_cmake'
+[0.626s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/har/Documents/Auto_drive/SR75/x86-c/src/joystick'
+[0.637s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[0.637s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.637s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.647s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/har/Documents/Auto_drive/SR75/x86-c/src/steering_can' with build type 'ament_cmake'
+[0.648s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/har/Documents/Auto_drive/SR75/x86-c/src/steering_can'
+[0.648s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.648s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.659s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/har/Documents/Auto_drive/SR75/x86-c/src/vehicle_interface' with build type 'ament_cmake'
+[0.660s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/har/Documents/Auto_drive/SR75/x86-c/src/vehicle_interface'
+[0.660s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.660s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.677s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface:/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can:/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control:/home/har/Documents/VNAV/lab4/install/trajectory_generation:/home/har/Documents/VNAV/lab4/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab4/install/tesse_msgs:/home/har/Documents/VNAV/lab4/install/planner_pkg:/home/har/Documents/VNAV/lab4/install/mav_trajectory_generation:/home/har/Documents/VNAV/lab4/install/mav_comm:/home/har/Documents/VNAV/lab4/install/mav_system_msgs:/home/har/Documents/VNAV/lab4/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab4/install/mav_planning_msgs:/home/har/Documents/VNAV/lab4/install/controller_pkg:/home/har/Documents/VNAV/lab4/install/mav_msgs:/home/har/Documents/VNAV/lab3/install/two_drones_pkg:/home/har/Documents/VNAV/lab3/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab3/install/tesse_msgs:/home/har/Documents/VNAV/lab3/install/mav_comm:/home/har/Documents/VNAV/lab3/install/mav_system_msgs:/home/har/Documents/VNAV/lab3/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab3/install/mav_planning_msgs:/home/har/Documents/VNAV/lab3/install/controller_pkg:/home/har/Documents/VNAV/lab3/install/mav_msgs:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/local/bin/cmake --build /home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control -- -j16 -l16
+[0.685s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/har/Documents/Auto_drive/SR75/x86-c/build/steering_can': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface:/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can:/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control:/home/har/Documents/VNAV/lab4/install/trajectory_generation:/home/har/Documents/VNAV/lab4/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab4/install/tesse_msgs:/home/har/Documents/VNAV/lab4/install/planner_pkg:/home/har/Documents/VNAV/lab4/install/mav_trajectory_generation:/home/har/Documents/VNAV/lab4/install/mav_comm:/home/har/Documents/VNAV/lab4/install/mav_system_msgs:/home/har/Documents/VNAV/lab4/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab4/install/mav_planning_msgs:/home/har/Documents/VNAV/lab4/install/controller_pkg:/home/har/Documents/VNAV/lab4/install/mav_msgs:/home/har/Documents/VNAV/lab3/install/two_drones_pkg:/home/har/Documents/VNAV/lab3/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab3/install/tesse_msgs:/home/har/Documents/VNAV/lab3/install/mav_comm:/home/har/Documents/VNAV/lab3/install/mav_system_msgs:/home/har/Documents/VNAV/lab3/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab3/install/mav_planning_msgs:/home/har/Documents/VNAV/lab3/install/controller_pkg:/home/har/Documents/VNAV/lab3/install/mav_msgs:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/local/bin/cmake --build /home/har/Documents/Auto_drive/SR75/x86-c/build/steering_can -- -j16 -l16
+[0.695s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/har/Documents/Auto_drive/SR75/x86-c/build/vehicle_interface': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface:/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can:/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control:/home/har/Documents/VNAV/lab4/install/trajectory_generation:/home/har/Documents/VNAV/lab4/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab4/install/tesse_msgs:/home/har/Documents/VNAV/lab4/install/planner_pkg:/home/har/Documents/VNAV/lab4/install/mav_trajectory_generation:/home/har/Documents/VNAV/lab4/install/mav_comm:/home/har/Documents/VNAV/lab4/install/mav_system_msgs:/home/har/Documents/VNAV/lab4/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab4/install/mav_planning_msgs:/home/har/Documents/VNAV/lab4/install/controller_pkg:/home/har/Documents/VNAV/lab4/install/mav_msgs:/home/har/Documents/VNAV/lab3/install/two_drones_pkg:/home/har/Documents/VNAV/lab3/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab3/install/tesse_msgs:/home/har/Documents/VNAV/lab3/install/mav_comm:/home/har/Documents/VNAV/lab3/install/mav_system_msgs:/home/har/Documents/VNAV/lab3/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab3/install/mav_planning_msgs:/home/har/Documents/VNAV/lab3/install/controller_pkg:/home/har/Documents/VNAV/lab3/install/mav_msgs:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/local/bin/cmake --build /home/har/Documents/Auto_drive/SR75/x86-c/build/vehicle_interface -- -j16 -l16
+[0.732s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface:/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can:/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control:/home/har/Documents/VNAV/lab4/install/trajectory_generation:/home/har/Documents/VNAV/lab4/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab4/install/tesse_msgs:/home/har/Documents/VNAV/lab4/install/planner_pkg:/home/har/Documents/VNAV/lab4/install/mav_trajectory_generation:/home/har/Documents/VNAV/lab4/install/mav_comm:/home/har/Documents/VNAV/lab4/install/mav_system_msgs:/home/har/Documents/VNAV/lab4/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab4/install/mav_planning_msgs:/home/har/Documents/VNAV/lab4/install/controller_pkg:/home/har/Documents/VNAV/lab4/install/mav_msgs:/home/har/Documents/VNAV/lab3/install/two_drones_pkg:/home/har/Documents/VNAV/lab3/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab3/install/tesse_msgs:/home/har/Documents/VNAV/lab3/install/mav_comm:/home/har/Documents/VNAV/lab3/install/mav_system_msgs:/home/har/Documents/VNAV/lab3/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab3/install/mav_planning_msgs:/home/har/Documents/VNAV/lab3/install/controller_pkg:/home/har/Documents/VNAV/lab3/install/mav_msgs:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/local/bin/cmake --build /home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control -- -j16 -l16
+[0.747s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface:/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can:/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control:/home/har/Documents/VNAV/lab4/install/trajectory_generation:/home/har/Documents/VNAV/lab4/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab4/install/tesse_msgs:/home/har/Documents/VNAV/lab4/install/planner_pkg:/home/har/Documents/VNAV/lab4/install/mav_trajectory_generation:/home/har/Documents/VNAV/lab4/install/mav_comm:/home/har/Documents/VNAV/lab4/install/mav_system_msgs:/home/har/Documents/VNAV/lab4/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab4/install/mav_planning_msgs:/home/har/Documents/VNAV/lab4/install/controller_pkg:/home/har/Documents/VNAV/lab4/install/mav_msgs:/home/har/Documents/VNAV/lab3/install/two_drones_pkg:/home/har/Documents/VNAV/lab3/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab3/install/tesse_msgs:/home/har/Documents/VNAV/lab3/install/mav_comm:/home/har/Documents/VNAV/lab3/install/mav_system_msgs:/home/har/Documents/VNAV/lab3/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab3/install/mav_planning_msgs:/home/har/Documents/VNAV/lab3/install/controller_pkg:/home/har/Documents/VNAV/lab3/install/mav_msgs:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/local/bin/cmake --install /home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control
+[0.772s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(joystick_control)
+[0.774s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface:/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can:/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control:/home/har/Documents/VNAV/lab4/install/trajectory_generation:/home/har/Documents/VNAV/lab4/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab4/install/tesse_msgs:/home/har/Documents/VNAV/lab4/install/planner_pkg:/home/har/Documents/VNAV/lab4/install/mav_trajectory_generation:/home/har/Documents/VNAV/lab4/install/mav_comm:/home/har/Documents/VNAV/lab4/install/mav_system_msgs:/home/har/Documents/VNAV/lab4/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab4/install/mav_planning_msgs:/home/har/Documents/VNAV/lab4/install/controller_pkg:/home/har/Documents/VNAV/lab4/install/mav_msgs:/home/har/Documents/VNAV/lab3/install/two_drones_pkg:/home/har/Documents/VNAV/lab3/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab3/install/tesse_msgs:/home/har/Documents/VNAV/lab3/install/mav_comm:/home/har/Documents/VNAV/lab3/install/mav_system_msgs:/home/har/Documents/VNAV/lab3/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab3/install/mav_planning_msgs:/home/har/Documents/VNAV/lab3/install/controller_pkg:/home/har/Documents/VNAV/lab3/install/mav_msgs:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/local/bin/cmake --install /home/har/Documents/Auto_drive/SR75/x86-c/build/joystick_control
+[0.786s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control' for CMake module files
+[0.787s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control' for CMake config files
+[0.788s] Level 1:colcon.colcon_core.shell:create_environment_hook('joystick_control', 'cmake_prefix_path')
+[0.788s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/joystick_control/hook/cmake_prefix_path.ps1'
+[0.789s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/joystick_control/hook/cmake_prefix_path.dsv'
+[0.791s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/joystick_control/hook/cmake_prefix_path.sh'
+[0.793s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/lib'
+[0.793s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/bin'
+[0.793s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/lib/pkgconfig/joystick_control.pc'
+[0.794s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/lib/python3.12/site-packages'
+[0.794s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/bin'
+[0.795s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/joystick_control/package.ps1'
+[0.796s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/joystick_control/package.dsv'
+[0.797s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/joystick_control/package.sh'
+[0.798s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/joystick_control/package.bash'
+[0.800s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/joystick_control/package.zsh'
+[0.800s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/colcon-core/packages/joystick_control)
+[0.802s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(joystick_control)
+[0.802s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control' for CMake module files
+[0.803s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control' for CMake config files
+[0.803s] Level 1:colcon.colcon_core.shell:create_environment_hook('joystick_control', 'cmake_prefix_path')
+[0.804s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/joystick_control/hook/cmake_prefix_path.ps1'
+[0.805s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/joystick_control/hook/cmake_prefix_path.dsv'
+[0.806s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/joystick_control/hook/cmake_prefix_path.sh'
+[0.807s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/lib'
+[0.807s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/bin'
+[0.807s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/lib/pkgconfig/joystick_control.pc'
+[0.808s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/lib/python3.12/site-packages'
+[0.808s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/bin'
+[0.809s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/joystick_control/package.ps1'
+[0.810s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/joystick_control/package.dsv'
+[0.811s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/joystick_control/package.sh'
+[0.812s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/joystick_control/package.bash'
+[0.812s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/joystick_control/package.zsh'
+[0.813s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control/share/colcon-core/packages/joystick_control)
+[4.091s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/har/Documents/Auto_drive/SR75/x86-c/build/steering_can' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface:/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can:/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control:/home/har/Documents/VNAV/lab4/install/trajectory_generation:/home/har/Documents/VNAV/lab4/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab4/install/tesse_msgs:/home/har/Documents/VNAV/lab4/install/planner_pkg:/home/har/Documents/VNAV/lab4/install/mav_trajectory_generation:/home/har/Documents/VNAV/lab4/install/mav_comm:/home/har/Documents/VNAV/lab4/install/mav_system_msgs:/home/har/Documents/VNAV/lab4/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab4/install/mav_planning_msgs:/home/har/Documents/VNAV/lab4/install/controller_pkg:/home/har/Documents/VNAV/lab4/install/mav_msgs:/home/har/Documents/VNAV/lab3/install/two_drones_pkg:/home/har/Documents/VNAV/lab3/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab3/install/tesse_msgs:/home/har/Documents/VNAV/lab3/install/mav_comm:/home/har/Documents/VNAV/lab3/install/mav_system_msgs:/home/har/Documents/VNAV/lab3/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab3/install/mav_planning_msgs:/home/har/Documents/VNAV/lab3/install/controller_pkg:/home/har/Documents/VNAV/lab3/install/mav_msgs:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/local/bin/cmake --build /home/har/Documents/Auto_drive/SR75/x86-c/build/steering_can -- -j16 -l16
+[4.092s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/har/Documents/Auto_drive/SR75/x86-c/build/steering_can': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface:/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can:/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control:/home/har/Documents/VNAV/lab4/install/trajectory_generation:/home/har/Documents/VNAV/lab4/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab4/install/tesse_msgs:/home/har/Documents/VNAV/lab4/install/planner_pkg:/home/har/Documents/VNAV/lab4/install/mav_trajectory_generation:/home/har/Documents/VNAV/lab4/install/mav_comm:/home/har/Documents/VNAV/lab4/install/mav_system_msgs:/home/har/Documents/VNAV/lab4/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab4/install/mav_planning_msgs:/home/har/Documents/VNAV/lab4/install/controller_pkg:/home/har/Documents/VNAV/lab4/install/mav_msgs:/home/har/Documents/VNAV/lab3/install/two_drones_pkg:/home/har/Documents/VNAV/lab3/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab3/install/tesse_msgs:/home/har/Documents/VNAV/lab3/install/mav_comm:/home/har/Documents/VNAV/lab3/install/mav_system_msgs:/home/har/Documents/VNAV/lab3/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab3/install/mav_planning_msgs:/home/har/Documents/VNAV/lab3/install/controller_pkg:/home/har/Documents/VNAV/lab3/install/mav_msgs:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/local/bin/cmake --install /home/har/Documents/Auto_drive/SR75/x86-c/build/steering_can
+[4.140s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(steering_can)
+[4.141s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can' for CMake module files
+[4.142s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/har/Documents/Auto_drive/SR75/x86-c/build/steering_can' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface:/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can:/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control:/home/har/Documents/VNAV/lab4/install/trajectory_generation:/home/har/Documents/VNAV/lab4/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab4/install/tesse_msgs:/home/har/Documents/VNAV/lab4/install/planner_pkg:/home/har/Documents/VNAV/lab4/install/mav_trajectory_generation:/home/har/Documents/VNAV/lab4/install/mav_comm:/home/har/Documents/VNAV/lab4/install/mav_system_msgs:/home/har/Documents/VNAV/lab4/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab4/install/mav_planning_msgs:/home/har/Documents/VNAV/lab4/install/controller_pkg:/home/har/Documents/VNAV/lab4/install/mav_msgs:/home/har/Documents/VNAV/lab3/install/two_drones_pkg:/home/har/Documents/VNAV/lab3/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab3/install/tesse_msgs:/home/har/Documents/VNAV/lab3/install/mav_comm:/home/har/Documents/VNAV/lab3/install/mav_system_msgs:/home/har/Documents/VNAV/lab3/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab3/install/mav_planning_msgs:/home/har/Documents/VNAV/lab3/install/controller_pkg:/home/har/Documents/VNAV/lab3/install/mav_msgs:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/local/bin/cmake --install /home/har/Documents/Auto_drive/SR75/x86-c/build/steering_can
+[4.143s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can' for CMake config files
+[4.144s] Level 1:colcon.colcon_core.shell:create_environment_hook('steering_can', 'cmake_prefix_path')
+[4.144s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/steering_can/hook/cmake_prefix_path.ps1'
+[4.145s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/steering_can/hook/cmake_prefix_path.dsv'
+[4.146s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/steering_can/hook/cmake_prefix_path.sh'
+[4.148s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/lib'
+[4.148s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/bin'
+[4.148s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/lib/pkgconfig/steering_can.pc'
+[4.149s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/lib/python3.12/site-packages'
+[4.150s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/bin'
+[4.150s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/steering_can/package.ps1'
+[4.151s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/steering_can/package.dsv'
+[4.153s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/steering_can/package.sh'
+[4.154s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/steering_can/package.bash'
+[4.155s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/steering_can/package.zsh'
+[4.156s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/colcon-core/packages/steering_can)
+[4.158s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(steering_can)
+[4.158s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can' for CMake module files
+[4.160s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can' for CMake config files
+[4.161s] Level 1:colcon.colcon_core.shell:create_environment_hook('steering_can', 'cmake_prefix_path')
+[4.162s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/steering_can/hook/cmake_prefix_path.ps1'
+[4.163s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/steering_can/hook/cmake_prefix_path.dsv'
+[4.164s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/steering_can/hook/cmake_prefix_path.sh'
+[4.166s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/lib'
+[4.166s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/bin'
+[4.167s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/lib/pkgconfig/steering_can.pc'
+[4.167s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/lib/python3.12/site-packages'
+[4.168s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/bin'
+[4.169s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/steering_can/package.ps1'
+[4.171s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/steering_can/package.dsv'
+[4.172s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/steering_can/package.sh'
+[4.173s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/steering_can/package.bash'
+[4.174s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/steering_can/package.zsh'
+[4.175s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can/share/colcon-core/packages/steering_can)
+[14.326s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/har/Documents/Auto_drive/SR75/x86-c/build/vehicle_interface' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface:/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can:/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control:/home/har/Documents/VNAV/lab4/install/trajectory_generation:/home/har/Documents/VNAV/lab4/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab4/install/tesse_msgs:/home/har/Documents/VNAV/lab4/install/planner_pkg:/home/har/Documents/VNAV/lab4/install/mav_trajectory_generation:/home/har/Documents/VNAV/lab4/install/mav_comm:/home/har/Documents/VNAV/lab4/install/mav_system_msgs:/home/har/Documents/VNAV/lab4/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab4/install/mav_planning_msgs:/home/har/Documents/VNAV/lab4/install/controller_pkg:/home/har/Documents/VNAV/lab4/install/mav_msgs:/home/har/Documents/VNAV/lab3/install/two_drones_pkg:/home/har/Documents/VNAV/lab3/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab3/install/tesse_msgs:/home/har/Documents/VNAV/lab3/install/mav_comm:/home/har/Documents/VNAV/lab3/install/mav_system_msgs:/home/har/Documents/VNAV/lab3/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab3/install/mav_planning_msgs:/home/har/Documents/VNAV/lab3/install/controller_pkg:/home/har/Documents/VNAV/lab3/install/mav_msgs:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/local/bin/cmake --build /home/har/Documents/Auto_drive/SR75/x86-c/build/vehicle_interface -- -j16 -l16
+[14.327s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/har/Documents/Auto_drive/SR75/x86-c/build/vehicle_interface': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface:/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can:/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control:/home/har/Documents/VNAV/lab4/install/trajectory_generation:/home/har/Documents/VNAV/lab4/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab4/install/tesse_msgs:/home/har/Documents/VNAV/lab4/install/planner_pkg:/home/har/Documents/VNAV/lab4/install/mav_trajectory_generation:/home/har/Documents/VNAV/lab4/install/mav_comm:/home/har/Documents/VNAV/lab4/install/mav_system_msgs:/home/har/Documents/VNAV/lab4/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab4/install/mav_planning_msgs:/home/har/Documents/VNAV/lab4/install/controller_pkg:/home/har/Documents/VNAV/lab4/install/mav_msgs:/home/har/Documents/VNAV/lab3/install/two_drones_pkg:/home/har/Documents/VNAV/lab3/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab3/install/tesse_msgs:/home/har/Documents/VNAV/lab3/install/mav_comm:/home/har/Documents/VNAV/lab3/install/mav_system_msgs:/home/har/Documents/VNAV/lab3/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab3/install/mav_planning_msgs:/home/har/Documents/VNAV/lab3/install/controller_pkg:/home/har/Documents/VNAV/lab3/install/mav_msgs:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/local/bin/cmake --install /home/har/Documents/Auto_drive/SR75/x86-c/build/vehicle_interface
+[14.356s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(vehicle_interface)
+[14.357s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface' for CMake module files
+[14.358s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/har/Documents/Auto_drive/SR75/x86-c/build/vehicle_interface' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface:/home/har/Documents/Auto_drive/SR75/x86-c/install/steering_can:/home/har/Documents/Auto_drive/SR75/x86-c/install/joystick_control:/home/har/Documents/VNAV/lab4/install/trajectory_generation:/home/har/Documents/VNAV/lab4/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab4/install/tesse_msgs:/home/har/Documents/VNAV/lab4/install/planner_pkg:/home/har/Documents/VNAV/lab4/install/mav_trajectory_generation:/home/har/Documents/VNAV/lab4/install/mav_comm:/home/har/Documents/VNAV/lab4/install/mav_system_msgs:/home/har/Documents/VNAV/lab4/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab4/install/mav_planning_msgs:/home/har/Documents/VNAV/lab4/install/controller_pkg:/home/har/Documents/VNAV/lab4/install/mav_msgs:/home/har/Documents/VNAV/lab3/install/two_drones_pkg:/home/har/Documents/VNAV/lab3/install/tesse_ros_bridge:/home/har/Documents/VNAV/lab3/install/tesse_msgs:/home/har/Documents/VNAV/lab3/install/mav_comm:/home/har/Documents/VNAV/lab3/install/mav_system_msgs:/home/har/Documents/VNAV/lab3/install/mav_state_machine_msgs:/home/har/Documents/VNAV/lab3/install/mav_planning_msgs:/home/har/Documents/VNAV/lab3/install/controller_pkg:/home/har/Documents/VNAV/lab3/install/mav_msgs:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/local/bin/cmake --install /home/har/Documents/Auto_drive/SR75/x86-c/build/vehicle_interface
+[14.359s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface' for CMake config files
+[14.360s] Level 1:colcon.colcon_core.shell:create_environment_hook('vehicle_interface', 'cmake_prefix_path')
+[14.360s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/hook/cmake_prefix_path.ps1'
+[14.361s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/hook/cmake_prefix_path.dsv'
+[14.362s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/hook/cmake_prefix_path.sh'
+[14.363s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/lib'
+[14.363s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/bin'
+[14.363s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/lib/pkgconfig/vehicle_interface.pc'
+[14.363s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/lib/python3.12/site-packages'
+[14.364s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/bin'
+[14.365s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/package.ps1'
+[14.365s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/package.dsv'
+[14.366s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/package.sh'
+[14.367s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/package.bash'
+[14.368s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/package.zsh'
+[14.368s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/colcon-core/packages/vehicle_interface)
+[14.369s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(vehicle_interface)
+[14.369s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface' for CMake module files
+[14.371s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface' for CMake config files
+[14.371s] Level 1:colcon.colcon_core.shell:create_environment_hook('vehicle_interface', 'cmake_prefix_path')
+[14.371s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/hook/cmake_prefix_path.ps1'
+[14.372s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/hook/cmake_prefix_path.dsv'
+[14.373s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/hook/cmake_prefix_path.sh'
+[14.374s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/lib'
+[14.375s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/bin'
+[14.375s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/lib/pkgconfig/vehicle_interface.pc'
+[14.375s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/lib/python3.12/site-packages'
+[14.376s] Level 1:colcon.colcon_core.environment:checking '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/bin'
+[14.377s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/package.ps1'
+[14.378s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/package.dsv'
+[14.378s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/package.sh'
+[14.379s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/package.bash'
+[14.380s] INFO:colcon.colcon_core.shell:Creating package script '/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/package.zsh'
+[14.380s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/colcon-core/packages/vehicle_interface)
+[14.381s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[14.382s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[14.382s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '0'
+[14.382s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[14.397s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[14.398s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.win32': Not used on non-Windows systems
+[14.398s] INFO:colcon.colcon_notification.desktop_notification:Sending desktop notification using 'notify2'
+[14.422s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[14.422s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/har/Documents/Auto_drive/SR75/x86-c/install/local_setup.ps1'
+[14.424s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/har/Documents/Auto_drive/SR75/x86-c/install/_local_setup_util_ps1.py'
+[14.425s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/har/Documents/Auto_drive/SR75/x86-c/install/setup.ps1'
+[14.426s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/har/Documents/Auto_drive/SR75/x86-c/install/local_setup.sh'
+[14.426s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/har/Documents/Auto_drive/SR75/x86-c/install/_local_setup_util_sh.py'
+[14.427s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/har/Documents/Auto_drive/SR75/x86-c/install/setup.sh'
+[14.428s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/har/Documents/Auto_drive/SR75/x86-c/install/local_setup.bash'
+[14.429s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/har/Documents/Auto_drive/SR75/x86-c/install/setup.bash'
+[14.430s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/har/Documents/Auto_drive/SR75/x86-c/install/local_setup.zsh'
+[14.431s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/har/Documents/Auto_drive/SR75/x86-c/install/setup.zsh'

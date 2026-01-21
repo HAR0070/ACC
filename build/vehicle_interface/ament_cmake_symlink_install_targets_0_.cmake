@@ -1,0 +1,1 @@
+ament_cmake_symlink_install_targets("TARGET_FILES" "/home/har/Documents/Auto_drive/SR75/x86-c/build/vehicle_interface/vehicle_interface_node" "TARGETS" "vehicle_interface_node" "DESTINATION" "lib/vehicle_interface")

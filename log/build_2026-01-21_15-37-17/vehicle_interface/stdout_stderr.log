@@ -1,0 +1,23 @@
+[ 50%] [32mBuilding CXX object CMakeFiles/vehicle_interface_node.dir/vehicle_interface.cpp.o[0m
+[100%] [32m[1mLinking CXX executable vehicle_interface_node[0m
+[100%] Built target vehicle_interface_node
+-- Install configuration: ""
+-- Execute custom install script
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/lib/vehicle_interface/vehicle_interface_node
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/config/can_config.yaml
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/lib/vehicle_interface/libcontrolcanfd.so
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/ament_index/resource_index/package_run_dependencies/vehicle_interface
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/ament_index/resource_index/parent_prefix_path/vehicle_interface
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/environment/ament_prefix_path.sh
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/environment/ament_prefix_path.dsv
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/environment/path.sh
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/environment/path.dsv
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/local_setup.bash
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/local_setup.sh
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/local_setup.zsh
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/local_setup.dsv
+-- Symlinking: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/package.dsv
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/ament_index/resource_index/packages/vehicle_interface
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/cmake/vehicle_interfaceConfig.cmake
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/cmake/vehicle_interfaceConfig-version.cmake
+-- Up-to-date symlink: /home/har/Documents/Auto_drive/SR75/x86-c/install/vehicle_interface/share/vehicle_interface/package.xml
