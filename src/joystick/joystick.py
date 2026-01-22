@@ -12,14 +12,14 @@ from std_msgs.msg import Float32MultiArray
 from collections import namedtuple
 
 
-DEADZONE = 0.1
-SEND_INTERVAL = 0.01
+DEADZONE = 0.05
+SEND_INTERVAL = 0.05
 
 KP = 10
 KD = 0.5
 KI = 0.5
-SPD_REF = 4000
-CUR_LIM = 2.5
+SPD_REF = 6000
+CUR_LIM = 10
 
 fb = namedtuple("fb" , ["pos" , "spd" , "cur"  , "temp" , "err"])
 
@@ -41,6 +41,8 @@ class steering_fb(Node):
         # State variables
         self.integral_err = 0
         self.controller = None
+        self.allow_control = True
+        self.first_time_takeover = True
 
         self.str_fb = fb(0,0,0,0,0)
 
@@ -50,16 +52,13 @@ class steering_fb(Node):
         try:
             self.find_controller()
             self.steering = self.controller.get_axis(0)
-            self.takeover = self.controller.get_button(7)
-            self.reset = self.controller.get_button(6)
+            self.takeover = self.controller.get_button(5)
+            self.reset = self.controller.get_button(4)
             self.throttle = self.controller.get_button(3)
 
         except Exception as e:
             print(f"couldn't connect to controller: {e}")
 
-
-
-        # This is CRITICAL must pump the event queue.
         pygame.event.pump()
 
     def find_controller(self):
@@ -145,17 +144,16 @@ class steering_fb(Node):
             pygame.event.pump()
             
             self.steering = self.controller.get_axis(0)
-            self.takeover = self.controller.get_button(7)
-            self.reset = self.controller.get_button(6)
+            self.takeover = self.controller.get_button(5)
+            self.reset = self.controller.get_button(4)
             self.throttle = self.controller.get_button(3)
 
-            steering = self.map_axis_to_position(self.steering , 3100)
+            steering = self.map_axis_to_position(self.steering , 600)
             throttle = self.map_axis_to_position(self.throttle , 128)
 
             cmd_takeover = self.takeover        # if we want to let driver takeover
             reset = self.reset              # get joystick command back
-            allow_control = True
-
+            
             # steering
             if self.str_fb.err == 0:
                 vel_x , self.integral_err ,takeover  = self.pid_pos_vel(steering , self.str_fb.pos, self.str_fb.spd,
@@ -164,23 +162,31 @@ class steering_fb(Node):
                 msg_steering = self.to_twist(vel_x)
             else :
                 self.get_logger().error("The steering motor has error")
-                allow_control = False
+                # self.allow_control = False
                 raise
 
             # throttle
             msg_throttle = self.to_twist(throttle)
 
             if cmd_takeover > 0.1 or takeover:
-                allow_control = False
+                self.allow_control = False
+            
+                if self.first_time_takeover:
+                    self.first_time_takeover = False
+                    msg_steering = self.to_twist(0)
+                    msg_throttle = self.to_twist(0)
+                    self.pub_str.publish(msg_steering)
+                    self.pub_accel.publish(msg_throttle)
 
             if reset:
-                allow_control = True
+                self.allow_control = True
+                self.first_time_takeover = True
 
-            if allow_control:
+            if self.allow_control == True:
                 self.pub_str.publish(msg_steering)
                 self.pub_accel.publish(msg_throttle)
             
-            self.get_logger().info(f" allow_control = {allow_control} vel = {vel_x} pos_ref = {steering} pos_fb = {self.str_fb.pos} takeover = {takeover} cmd_tak = {cmd_takeover}")
+            self.get_logger().info(f" allow_control = {self.allow_control} vel = {vel_x} pos_ref = {steering} pos_fb = {self.str_fb.pos} takeover = {takeover} cmd_tak = {cmd_takeover}")
 
         except KeyboardInterrupt:
             print("\nExiting program.")
