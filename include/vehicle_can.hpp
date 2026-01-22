@@ -70,8 +70,14 @@ class vehicle_can{
             d.push_back(0);
         }
 
+        // LOGGING: Check what SDO we are writing
+        if(debug) {
+            LOG(INFO) << "SDO Write -> Index: 0x" << std::hex << index 
+                      << " Sub: " << (int)sub_idx 
+                      << " Value: 0x" << value;
+        }
+        
         send_sdo(0x601 , d , 1);
-
     }
 
     void send_sdo_raw(uint16_t index, uint8_t sub, std::vector<unsigned char> data) {
@@ -86,6 +92,7 @@ class vehicle_can{
         while(d.size() < 8) d.push_back(0);
 
         send_sdo(0x601, d, 1);
+        usleep(20);
     }
 
     void send_sdo(uint32_t id , std::vector<unsigned char> data , int type){
@@ -95,6 +102,7 @@ class vehicle_can{
         cmd_struct.transmit_type = type;
 
         driver->send_command(cmd_struct);
+        usleep(20);
     }
 
     public:
@@ -125,11 +133,9 @@ class vehicle_can{
 
         // NMT frame to entre pre-operation (80)
         send_sdo(0x0000 , {0x80 , 0x00} , 0);
-        usleep(50);
 
         // Disable RPDO1
         send_sdo_write(0x1600 , 0x00, 0);
-        usleep(50);
 
         // Map throttle to sub index 1 on 0x1600
         //[16-bit Length] [Sub-index] [Index Low] [Index High]
@@ -137,23 +143,21 @@ class vehicle_can{
 
         // for brake
         send_sdo_write(0x1600 , 0x02 , 0x32190010);
-        usleep(50);
 
         // enable RPDO1
         send_sdo_write(0x1600 , 0x00 , 2);
-        usleep(50);
+
 
         // TPDO 1 - for 0-4,  2
         configure_tpdo(0, 0x1A00,  0x1800); // Vars 0-3
-        usleep(50);
 
         configure_tpdo(4, 0x1A01, 0x1801); // Vars 4-7
-        usleep(50);
 
         // 3. Enter Operational Mode (Start Processing)
         // ID 000 (NMT), Data: 01 (Start), 00 (All Nodes)
         send_sdo(0x000, {0x01, 0x00}, 0);
-        usleep(50);
+        
+        if (debug) LOG(INFO) << "Sending NMT Start Node...";
     }
 
     void configure_tpdo(int start_idx, uint32_t map_obj,  int comm_obj) {
@@ -171,19 +175,20 @@ class vehicle_can{
             uint8_t sub_idx = (i % 4) + 1;
 
             send_sdo_write(map_obj , mapping ,  sub_idx );
-            usleep(20);
             count++;
         }
 
-        // 3. Set Event Timer (Async 50Hz = 20ms)
+        // 3. Set Event Timer (Async 20Hz = 50ms)
         // Subindex 2 (Type) = 255 (Async)
         send_sdo_write(comm_obj, 0x02, 255, 1); // 1 byte
-        // Subindex 5 (Timer) = 20ms
-        send_sdo_write(comm_obj, 0x05, 20, 2); // 2 bytes
+        // Subindex 5 (Timer) = 50ms
+        send_sdo_write(comm_obj, 0x05, 50, 2); // 2 bytes
         usleep(50);
 
         // 4. Enable TPDO (Write count)
         send_sdo_write(map_obj, 0x00, count);
+
+        if (debug) LOG(INFO) << "Configured TPDO 0x" << std::hex << map_obj << " with " << count << " entries.";
     }
 
     void send_drive_command(long throttle, long brake) {
@@ -208,6 +213,13 @@ class vehicle_can{
     void read_feedback() {
         std::vector<CanMessage> msgs = driver->read_all_messages(can_line);
 
+        // Debug: Log if no messages received
+        if (msgs.empty() && debug) {
+            // Uncomment if you want to see this spam
+            // LOG(WARNING) << "No CAN messages received on line " << can_line;
+            return;
+        }
+
         for(const auto& msg : msgs) {
             // TPDO 1 (0x180 + NodeID 1 = 0x181) -> Vars 1-4
             if(msg.id == 0x181 && msg.data.size() >= 8) {
@@ -223,6 +235,9 @@ class vehicle_can{
                 fb.current = (int16_t)(msg.data[2] | (msg.data[3] << 8));
                 fb.sys_flags = (int16_t)(msg.data[4] | (msg.data[5] << 8));
                 fb.main_state = (int16_t)(msg.data[6] | (msg.data[7] << 8));
+            } 
+            else if (msg.id == 0x581) {
+                if(debug) LOG(INFO) << "Received SDO Response (0x581)";
             }
         }
     }

@@ -54,7 +54,7 @@ class steering_fb(Node):
             self.steering = self.controller.get_axis(0)
             self.takeover = self.controller.get_button(5)
             self.reset = self.controller.get_button(4)
-            self.throttle = self.controller.get_button(3)
+            self.throttle = self.controller.get_button(2)
 
         except Exception as e:
             print(f"couldn't connect to controller: {e}")
@@ -146,10 +146,12 @@ class steering_fb(Node):
             self.steering = self.controller.get_axis(0)
             self.takeover = self.controller.get_button(5)
             self.reset = self.controller.get_button(4)
-            self.throttle = self.controller.get_button(3)
+            self.throttle = self.controller.get_axis(2)
 
             steering = self.map_axis_to_position(self.steering , 600)
             throttle = self.map_axis_to_position(self.throttle , 128)
+            
+            # self.get_logger().info(f"throttle read {throttle}")
 
             cmd_takeover = self.takeover        # if we want to let driver takeover
             reset = self.reset              # get joystick command back
@@ -186,8 +188,9 @@ class steering_fb(Node):
                 self.pub_str.publish(msg_steering)
                 self.pub_accel.publish(msg_throttle)
             
-            self.get_logger().info(f" allow_control = {self.allow_control} vel = {vel_x} pos_ref = {steering} pos_fb = {self.str_fb.pos} takeover = {takeover} cmd_tak = {cmd_takeover}")
-
+            # self.get_logger().info(f" allow_control = {self.allow_control} vel = {vel_x} pos_ref = {steering} pos_fb = {self.str_fb.pos} takeover = {takeover} cmd_tak = {cmd_takeover}")
+            # self.get_logger().info(f"throttle sent {throttle}")
+            
         except KeyboardInterrupt:
             print("\nExiting program.")
             sys.exit(1)

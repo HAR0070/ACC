@@ -7,14 +7,14 @@ can1:
   baud_rate: 1000000 
 
 can2:
-  baud_rate: 1000000
+  baud_rate: 500000
 
 radar:
   debug: true
   can_line: "can2"
 
 steering: 
-  debug: true
+  debug: false
   can_line: "can1"
   motor_id: 104
   mode: 3
@@ -22,4 +22,4 @@ steering:
 
 vehicle:
   debug: true
-  can_line: "can1"
+  can_line: "can2"

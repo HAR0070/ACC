@@ -69,6 +69,7 @@ public:
             cfg.canfd.acc_mask = 0xFFFFFFFF;
 
             ch_handles[i] = ZCAN_InitCAN(device_handle, i, &cfg);
+
             if (ch_handles[i] == 0 || ZCAN_StartCAN(ch_handles[i]) != 1) {
                 LOG(ERROR) << "Failed to start CAN Channel " << i;
             } else {
@@ -113,7 +114,7 @@ public:
         tx_msg.frame.can_dlc = cmd.data.size();
         tx_msg.transmit_type = cmd.transmit_type;
 
-        if (debug) LOG(INFO) << "extebded can_id is " << cmd.can_id << "data size" << cmd.data.size();
+        // if (debug) LOG(INFO) << "extebded can_id is " << cmd.can_id << "data size" << cmd.data.size();
 
         for(size_t i=0; i < cmd.data.size(); i++) {
             tx_msg.frame.data[i] = cmd.data[i];

@@ -67,7 +67,7 @@ private:
 
         pub_str_fb->publish(steering_fb);
 
-        RCLCPP_INFO(this->get_logger() , "Steering feedback published");
+        // RCLCPP_INFO(this->get_logger() , "Steering feedback published");
 
         vehicle->read_feedback();
         auto vehicle_fb = std_msgs::msg::Float32MultiArray();
@@ -83,14 +83,23 @@ private:
 
         pub_vehicle_fb->publish(vehicle_fb);
 
-        RCLCPP_INFO(this->get_logger() , "Vehicle feedback published");
+        // RCLCPP_INFO(this->get_logger() , "Vehicle feedback published");
+        RCLCPP_INFO(this->get_logger(), 
+        "Vehicle feedback: Thr:%d, Brk:%d, Spd:%d, Acc:%d, RPM:%d, Cur:%d, Flags:%d", 
+        vehicle->fb.throttle, 
+        vehicle->fb.brake,
+        vehicle->fb.speed, 
+        vehicle->fb.acceleration, 
+        vehicle->fb.motor_rpm, 
+        vehicle->fb.current, 
+        vehicle->fb.sys_flags);
 
     }
 
     void steering_callback(const geometry_msgs::msg::Twist::SharedPtr msg) const{
         steering->steering_command(msg->linear.x);
 
-        RCLCPP_INFO(this->get_logger(), "steering sent '%f'" , msg->linear.x);
+        // RCLCPP_INFO(this->get_logger(), "steering sent '%f'" , msg->linear.x);
     }
 
     void throttle_callback(const geometry_msgs::msg::Twist::SharedPtr msg) const{
@@ -110,6 +119,7 @@ int main(int argc , char * argv[]){
     std::string config_path = share_dir + "/config/can_config.yaml";
 
     // FLAGS_log_dir = share_dir+ "../../logs";
+    FLAGS_logtostderr = 1;
     google::InitGoogleLogging(argv[0]);
 
     can_handler driver(config_path);
