@@ -149,7 +149,7 @@ class steering_fb(Node):
             self.throttle = self.controller.get_axis(2)
 
             steering = self.map_axis_to_position(self.steering , 600)
-            throttle = self.map_axis_to_position(self.throttle , 128)
+            throttle = self.map_axis_to_position(self.throttle , 32767)
             
             # self.get_logger().info(f"throttle read {throttle}")
 
