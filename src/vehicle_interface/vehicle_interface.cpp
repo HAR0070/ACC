@@ -67,7 +67,7 @@ private:
 
         pub_str_fb->publish(steering_fb);
 
-        // RCLCPP_INFO(this->get_logger() , "Steering feedback published");
+        RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "Steering feedback published");
 
         vehicle->read_feedback();
         auto vehicle_fb = std_msgs::msg::Float32MultiArray();
@@ -84,14 +84,14 @@ private:
         pub_vehicle_fb->publish(vehicle_fb);
 
         // RCLCPP_INFO(this->get_logger() , "Vehicle feedback published");
-        RCLCPP_INFO(this->get_logger(), 
-        "Vehicle feedback: Thr:%d, Brk:%d, Spd:%d, Acc:%d, RPM:%d, Cur:%d, Flags:%d", 
-        vehicle->fb.throttle, 
+        RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
+        "Vehicle feedback: Thr:%d, Brk:%d, Spd:%d, Acc:%d, RPM:%d, Cur:%d, Flags:%d",
+        vehicle->fb.throttle,
         vehicle->fb.brake,
-        vehicle->fb.speed, 
-        vehicle->fb.acceleration, 
-        vehicle->fb.motor_rpm, 
-        vehicle->fb.current, 
+        vehicle->fb.speed,
+        vehicle->fb.acceleration,
+        vehicle->fb.motor_rpm,
+        vehicle->fb.current,
         vehicle->fb.sys_flags);
 
     }
@@ -99,7 +99,7 @@ private:
     void steering_callback(const geometry_msgs::msg::Twist::SharedPtr msg) const{
         steering->steering_command(msg->linear.x);
 
-        // RCLCPP_INFO(this->get_logger(), "steering sent '%f'" , msg->linear.x);
+        RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "steering sent '%f'" , msg->linear.x);
     }
 
     void throttle_callback(const geometry_msgs::msg::Twist::SharedPtr msg) const{
@@ -107,7 +107,7 @@ private:
         if (msg->linear.x > 0) vehicle->send_drive_command((long)msg->linear.x , 0);
         else vehicle->send_drive_command(0 , -1*(long)msg->linear.x);
 
-        RCLCPP_INFO(this->get_logger(), "throttle sent '%f'" ,  msg->linear.x);
+        RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "throttle sent '%f'" ,  msg->linear.x);
     }
 
 };

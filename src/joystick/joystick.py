@@ -9,6 +9,7 @@ from rclpy.node import Node
 
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Bool
 from collections import namedtuple
 
 
@@ -31,6 +32,9 @@ class steering_fb(Node):
         self.pub_accel = self.create_publisher(Twist , '/vehicle_throttle' , 10)
         self.sub_str_fb = self.create_subscription(Float32MultiArray , '/steering_feedback' ,
                                                 self.read_steering_feedback, 10 )
+        
+        self.sub_steering_takeover = self.create_subscription(Bool , '/steering_takeover' ,
+                                                self.read_takeover , 10)
 
         self.sub_str_fb
 
@@ -87,6 +91,11 @@ class steering_fb(Node):
 
         return msg
 
+    def read_takeover(self , msg):
+        if msg.data:
+            self.takeover = 1
+            print(f"got takeover command on subscription")
+
     def read_steering_feedback(self , msg):
 
         self.str_fb = fb(*msg.data)
@@ -95,7 +104,7 @@ class steering_fb(Node):
         # self.str_fb.temp = msg.data[3]
         # self.str_fb.err = msg.data[4]
 
-        self.get_logger().info("Steering feedback came in")
+        # self.get_logger().info("Steering feedback came in")
         # self.get_logger().info(*msg.data)
 
     def pid_pos_vel(self, ref_pos , pos_fb , speed_fb , curr_fb , integral_err):

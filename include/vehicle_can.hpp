@@ -147,7 +147,6 @@ class vehicle_can{
         // enable RPDO1
         send_sdo_write(0x1600 , 0x00 , 2);
 
-
         // TPDO 1 - for 0-4,  2
         configure_tpdo(0, 0x1A00,  0x1800); // Vars 0-3
 
@@ -183,7 +182,6 @@ class vehicle_can{
         send_sdo_write(comm_obj, 0x02, 255, 1); // 1 byte
         // Subindex 5 (Timer) = 50ms
         send_sdo_write(comm_obj, 0x05, 50, 2); // 2 bytes
-        usleep(50);
 
         // 4. Enable TPDO (Write count)
         send_sdo_write(map_obj, 0x00, count);

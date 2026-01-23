@@ -12,3 +12,9 @@ launch:
     exec: "joystick.py"
     name: "joy1"
     namespace: "joystick"
+
+- node:
+    pkg: "driver_takeover"
+    exec: "driver_takeover.py"
+    name: "takeover_node1"
+    namespace: "takeover_node"

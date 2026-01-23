@@ -65,3 +65,9 @@ Radar frequency is ==
 Its lower than 20Hz -- so there might be lag in radar data - shouldn't be a problem
 
 radar visualization code is same as written by muni 
+
+To run the IMU package - source the package and in  /home/har/Documents/Auto_drive/steering_motor/imu_ws  -- add it to bashrc temporarily
+then run  - ros2 launch fixposition_driver_ros2 node.launch
+
+for IMU reference - https://docs.fixposition.com/fd/installation-and-usage
+https://github.com/fixposition/fixposition_driver

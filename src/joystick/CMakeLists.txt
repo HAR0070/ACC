@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(joystick_control) # FIXED NAME
+project(joystick_control) 
 
 find_package(ament_cmake REQUIRED)
 
