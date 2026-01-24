@@ -62,7 +62,7 @@ sudo nano /etc/udev/rules.d/99-canfd.rules
 SUBSYSTEM=="usb", ATTR{idVendor}=="04d8", ATTR{idProduct}=="0053", MODE="0666"
 
 Radar frequency is ==    
-Its lower than 20Hz -- so there might be lag in radar data - shouldn't be a problem
+Its lower than 20Hz -- so there might be lag in radar data - shouldnt be a problem
 
 radar visualization code is same as written by muni 
 
@@ -87,3 +87,6 @@ If we have to give 0 torque command then feedback id might also change
 - so have to collect fb from both
 
 U also need to write destructor for the Can handler - so that we dont need to unplug after stopping every time
+
+
+Make Sure the vehicle controller has Node id = 1 , change curtis can parameters accordingly

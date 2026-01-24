@@ -24,6 +24,8 @@ So we need to first set - which all variables we want to log - into 4 TPDO -  pa
 SImilary we need to set receiver PDO format - ie throttle and brake value mapping to 0x1600 and 0x1601
 
 The motor controller is slave in this case
+
+Make sure the controller has node is 1  - that why SDO is 601 and feedback is 581
 */
 
 class vehicle_can{
@@ -119,7 +121,14 @@ class vehicle_can{
 
         for(const auto& msg : msgs) {
             if (msg.id == 0x581) {
-                if(debug) LOG(INFO) << "Received SDO Response (0x581)";
+                if (msg.data != 0x60)  LOG(ERROR) << "SDO rejected" << msg.data[0] << " convert to hex to read err code" << msg.data[4] <<24 | msg.data[5] <<16 | msg.data[6] <<8 | msg.data[7] ;
+                if(debug) LOG(INFO) << "Received SDO Response (0x581)" << msg.data[0] << msg.data[4] <<24 | msg.data[5] <<16 | msg.data[6] <<8 | msg.data[7] ;
+                // 06 01 00 00 (0x06010000): Object not found (Wrong Index/Sub-index).
+                // 06 02 00 00 (0x06020000): Object does not exist in object dictionary.
+                // 06 01 00 02 (0x06010002): Attempt to write a Read-Only object.
+                // 06 04 00 41 (0x06040041): Object cannot be mapped to PDO.
+                // 08 00 00 20 (0x08000020): Data cannot be transferred or stored.
+                // 08 00 00 22 (0x08000022): Data cannot be transferred or stored due to
             }
         }
     }
@@ -154,6 +163,7 @@ class vehicle_can{
         send_sdo(0x0000 , {0x80 , 0x00} , 0);
 
         // Disable RPDO1
+        send_sdo_write(0x1400 , 0x01, 0x201 | 0x80000000);
         send_sdo_write(0x1600 , 0x00, 0);
 
         // Map throttle to sub index 1 on 0x1600
@@ -165,11 +175,16 @@ class vehicle_can{
 
         // enable RPDO1
         send_sdo_write(0x1600 , 0x00 , 2);
+        send_sdo_write(0x1400 , 0x01, 0x201);
 
-        // TPDO 1 - for 0-4,  2
-        configure_tpdo(0, 0x1A00,  0x1800); // Vars 0-3
+        // TPDO -- First Disable the COBid - then write in it - then enable
+        send_sdo_write(0x1800, 0x01, 0x181 | 0x80000000);
+        configure_tpdo(0, 0x1A00,  0x1800); // Vars 0-3  1800 is communication parameter
+        send_sdo_write(0x1800, 0x01, 0x181);
 
+        send_sdo_write(0x1801, 0x01, 0x281 | 0x80000000);
         configure_tpdo(4, 0x1A01, 0x1801); // Vars 4-7
+        send_sdo_write(0x1801, 0x01, 0x281);
 
         // 3. Enter Operational Mode (Start Processing)
         // ID 000 (NMT), Data: 01 (Start), 00 (All Nodes)
@@ -179,10 +194,10 @@ class vehicle_can{
     }
 
     void configure_tpdo(int start_idx, uint32_t map_obj,  int comm_obj) {
-        // 1. Disable TPDO
+        // Disable TPDO
         send_sdo_write(map_obj, 0x00, 0);
 
-        // 2. Map Variables
+        // Map Variables
         int count = 0;
         for (int i = start_idx; i < start_idx + 4; i++) {
             if (i >= feedback_var.size()) break;
@@ -196,13 +211,13 @@ class vehicle_can{
             count++;
         }
 
-        // 3. Set Event Timer (Async 20Hz = 50ms)
+        // Set Event Timer (Async 20Hz = 50ms)
         // Subindex 2 (Type) = 255 (Async)
-        send_sdo_write(comm_obj, 0x02, 255, 1); // 1 byte
+        send_sdo_write(comm_obj, 0x02, 0xFF, 1); // 1 byte
         // Subindex 5 (Timer) = 50ms
         send_sdo_write(comm_obj, 0x05, 50, 2); // 2 bytes
 
-        // 4. Enable TPDO (Write count)
+        // Enable TPDO (Write count)
         send_sdo_write(map_obj, 0x00, count);
 
         if (debug) LOG(INFO) << "Configured TPDO 0x" << std::hex << map_obj << " with " << count << " entries.";
@@ -254,16 +269,6 @@ class vehicle_can{
                 fb.sys_flags = (int16_t)(msg.data[4] | (msg.data[5] << 8));
                 fb.main_state = (int16_t)(msg.data[6] | (msg.data[7] << 8));
             } 
-            else if (msg.id == 385) {
-                if(debug) LOG(INFO) << "Received SDO Response (0x385)";
-                fb.throttle = (int16_t)(msg.data[0] | (msg.data[1] << 8));
-                fb.brake = (int16_t)(msg.data[2] | (msg.data[3] << 8));
-                fb.speed = (int16_t)(msg.data[4] | (msg.data[5] << 8));
-                fb.acceleration = (int16_t)(msg.data[6] | (msg.data[7] << 8));
-            }
-            // else if(msg.id == 0x1793 && msg.data.size() >= 8) {
-            //     if(debug) LOG(INFO) << "Received Heartbeat Response (0x1793)";
-            // } 
 
             else if (msg.id == 0x581) {
                 if(debug) LOG(INFO) << "Received SDO Response (0x581)";

@@ -85,7 +85,8 @@ private:
 
         // RCLCPP_INFO(this->get_logger() , "Vehicle feedback published");
         RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
-        "Vehicle feedback: Thr:%d, Brk:%d, Spd:%d, Acc:%d, RPM:%d, Cur:%d, Flags:%d",
+        // "Vehicle feedback: Thr:%d, Brk:%d, Spd:%d, Acc:%d, RPM:%d, Cur:%d, Flags:%d",
+        "Vehicle feedback: Thr:%f, Brk:%f, Spd:%f, Acc:%f, RPM:%f, Cur:%f, Flags:%d",
         vehicle->fb.throttle,
         vehicle->fb.brake,
         vehicle->fb.speed,
