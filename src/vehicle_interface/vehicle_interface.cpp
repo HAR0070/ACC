@@ -97,7 +97,11 @@ private:
     }
 
     void steering_callback(const geometry_msgs::msg::Twist::SharedPtr msg) const{
-        steering->steering_command(msg->linear.x);
+
+        // if takeover is initiated -- then we command 0 torque - and stop motor
+        if (msg->linear.y == -1) steering->steering_stop();
+        
+        else steering->steering_command(msg->linear.x);
 
         RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "steering sent '%f'" , msg->linear.x);
     }

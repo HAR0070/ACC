@@ -184,8 +184,8 @@ class steering_fb(Node):
             
                 if self.first_time_takeover:
                     self.first_time_takeover = False
-                    msg_steering = self.to_twist(0)
-                    msg_throttle = self.to_twist(0)
+                    msg_steering = self.to_twist(0,-1)
+                    msg_throttle = self.to_twist(0,-1)
                     self.pub_str.publish(msg_steering)
                     self.pub_accel.publish(msg_throttle)
 

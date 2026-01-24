@@ -71,3 +71,19 @@ then run  - ros2 launch fixposition_driver_ros2 node.launch
 
 for IMU reference - https://docs.fixposition.com/fd/installation-and-usage
 https://github.com/fixposition/fixposition_driver
+
+
+in steering can driver - 
+
+for(const auto& msg : all_msgs) {
+
+            if(debug) LOG(INFO) << "pile has id " << msg.id << "these are maybe extended";
+
+            if (msg.id != expected_id or ) continue;  this line was commented 
+            // thats why when working with both can - steering had issue
+            // and it was saying steering fb received 
+
+If we have to give 0 torque command then feedback id might also change 
+- so have to collect fb from both
+
+U also need to write destructor for the Can handler - so that we dont need to unplug after stopping every time

@@ -53,13 +53,14 @@ public:
     void process_feedback(const std::vector<CanMessage>& all_msgs){
         // uint32_t expected_id = MOTOR_ID | (mode << 8);
         const uint32_t EFF_FLAG = 0x80000000;
-        uint32_t expected_id = 2968 | EFF_FLAG;
+        uint32_t expected_id_vel = 2968 | EFF_FLAG;
+        uint32_t expected_id_torque = 2968 | EFF_FLAG;
 
         for(const auto& msg : all_msgs) {
 
             if(debug) LOG(INFO) << "pile has id " << msg.id << "these are maybe extended";
 
-            // if (msg.id != expected_id) continue;
+            if (msg.id != expected_id_vel || msg.id != expected_id_torque ) continue;
             if (msg.data.size() < 7) continue;
 
             const unsigned char* b = msg.data.data();
@@ -78,6 +79,22 @@ public:
                         << "Err:"   << fb.err;
             }
         }
+    }
+
+    void steering_stop(){
+
+        // here we command 0 torque - use while takeover is initiated
+        CanCommand frame;
+        frame.can_line = can_line;
+        frame.transmit_type = 0;
+        frame.can_id = MOTOR_ID | (0x01 << 8);
+
+        frame.data.push_back((0 >> 24) & 0xFF);
+        frame.data.push_back((0 >> 16) & 0xFF);
+        frame.data.push_back((0 >> 8)  & 0xFF);
+        frame.data.push_back((0)       & 0xFF);
+
+        driver->send_ext_command(frame);
     }
 
     void steering_command(long rpm) {

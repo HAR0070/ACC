@@ -73,8 +73,8 @@ class vehicle_can{
         // LOGGING: Check what SDO we are writing
         if(debug) {
             LOG(INFO) << "SDO Write -> Index: 0x" << std::hex << index 
-                      << " Sub: " << (int)sub_idx 
-                      << " Value: 0x" << value;
+                        << " Sub: " << (int)sub_idx 
+                        << " Value: 0x" << value;
         }
         
         send_sdo(0x601 , d , 1);
@@ -92,7 +92,8 @@ class vehicle_can{
         while(d.size() < 8) d.push_back(0);
 
         send_sdo(0x601, d, 1);
-        usleep(20);
+        usleep(5000);
+        sdo_feedback();
     }
 
     void send_sdo(uint32_t id , std::vector<unsigned char> data , int type){
@@ -102,7 +103,25 @@ class vehicle_can{
         cmd_struct.transmit_type = type;
 
         driver->send_command(cmd_struct);
-        usleep(20);
+        usleep(5000);
+        sdo_feedback();
+    }
+
+    void sdo_feedback(){
+        std::vector<CanMessage> msgs = driver->read_all_messages(can_line);
+
+        // Debug: Log if no messages received
+        if (msgs.empty() && debug) {
+            // Uncomment if you want to see this spam
+            LOG(WARNING) << "Didn't receive SDO feedback " << can_line;
+            return;
+        }
+
+        for(const auto& msg : msgs) {
+            if (msg.id == 0x581) {
+                if(debug) LOG(INFO) << "Received SDO Response (0x581)";
+            }
+        }
     }
 
     public:
@@ -173,7 +192,7 @@ class vehicle_can{
 
             uint8_t sub_idx = (i % 4) + 1;
 
-            send_sdo_write(map_obj , mapping ,  sub_idx );
+            send_sdo_write(map_obj ,sub_idx, mapping );
             count++;
         }
 
@@ -195,15 +214,17 @@ class vehicle_can{
         cmd_struct.transmit_type = 0; // Normal send
         cmd_struct.data.clear(); // IMPORTANT: Clear previous data!
 
-        if (throttle >0 && brake > 0) LOG(ERROR) << "Both throttle and brake is set at a time";
-
-        // Throttle (16-bit Little Endian)
-        cmd_struct.data.push_back(throttle & 0xFF);
-        cmd_struct.data.push_back((throttle >> 8) & 0xFF);
-
-        // Brake (16-bit Little Endian)
+        if (throttle > 0 && brake > 0) {
+            throttle = 0; // Prioritize brake
+            LOG(ERROR) << "Both throttle and brake is set at a time";
+        }
+         // --- BYTES 0-1: Brake ---
         cmd_struct.data.push_back(brake & 0xFF);
         cmd_struct.data.push_back((brake >> 8) & 0xFF);
+
+       // --- BYTES 1-0: Throttle ---
+        cmd_struct.data.push_back(throttle & 0xFF);
+        cmd_struct.data.push_back((throttle >> 8) & 0xFF);
 
         driver->send_command(cmd_struct);
     }
@@ -225,7 +246,6 @@ class vehicle_can{
                 fb.brake = (int16_t)(msg.data[2] | (msg.data[3] << 8));
                 fb.speed = (int16_t)(msg.data[4] | (msg.data[5] << 8));
                 fb.acceleration = (int16_t)(msg.data[6] | (msg.data[7] << 8));
-
             }
             // TPDO 2 (0x280 + NodeID 1 = 0x281) -> Vars 5-8
             else if(msg.id == 0x281 && msg.data.size() >= 8) {
@@ -234,6 +254,17 @@ class vehicle_can{
                 fb.sys_flags = (int16_t)(msg.data[4] | (msg.data[5] << 8));
                 fb.main_state = (int16_t)(msg.data[6] | (msg.data[7] << 8));
             } 
+            else if (msg.id == 385) {
+                if(debug) LOG(INFO) << "Received SDO Response (0x385)";
+                fb.throttle = (int16_t)(msg.data[0] | (msg.data[1] << 8));
+                fb.brake = (int16_t)(msg.data[2] | (msg.data[3] << 8));
+                fb.speed = (int16_t)(msg.data[4] | (msg.data[5] << 8));
+                fb.acceleration = (int16_t)(msg.data[6] | (msg.data[7] << 8));
+            }
+            // else if(msg.id == 0x1793 && msg.data.size() >= 8) {
+            //     if(debug) LOG(INFO) << "Received Heartbeat Response (0x1793)";
+            // } 
+
             else if (msg.id == 0x581) {
                 if(debug) LOG(INFO) << "Received SDO Response (0x581)";
             }
