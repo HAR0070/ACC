@@ -108,8 +108,9 @@ private:
 
     void throttle_callback(const geometry_msgs::msg::Twist::SharedPtr msg) const{
 
-        if (msg->linear.x > 0) vehicle->send_drive_command((long)msg->linear.x , 0);
-        else vehicle->send_drive_command(0 , -1*(long)msg->linear.x);
+        // if (msg->linear.x > 0)
+        vehicle->send_drive_command((long)msg->linear.x , (long)msg->linear.y );
+        // else vehicle->send_drive_command(0 , -1*(long)msg->linear.x);
 
         RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "throttle sent '%f'" ,  msg->linear.x);
     }

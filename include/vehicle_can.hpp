@@ -222,7 +222,7 @@ class vehicle_can{
         cmd_struct.data.push_back(brake & 0xFF);
         cmd_struct.data.push_back((brake >> 8) & 0xFF);
 
-       // --- BYTES 1-0: Throttle ---
+       // --- BYTES 1-0 : Throttle ---
         cmd_struct.data.push_back(throttle & 0xFF);
         cmd_struct.data.push_back((throttle >> 8) & 0xFF);
 
