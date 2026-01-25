@@ -121,8 +121,11 @@ class vehicle_can{
 
         for(const auto& msg : msgs) {
             if (msg.id == 0x581) {
-                if (msg.data != 0x60)  LOG(ERROR) << "SDO rejected" << msg.data[0] << " convert to hex to read err code" << msg.data[4] <<24 | msg.data[5] <<16 | msg.data[6] <<8 | msg.data[7] ;
-                if(debug) LOG(INFO) << "Received SDO Response (0x581)" << msg.data[0] << msg.data[4] <<24 | msg.data[5] <<16 | msg.data[6] <<8 | msg.data[7] ;
+                if (msg.data[0] != 0x60) {
+                    uint32_t  error = (msg.data[4] <<24) | (msg.data[5] <<16) | (msg.data[6] <<8) | msg.data[7] ;
+                    LOG(ERROR) << "SDO rejected" << msg.data[0] << " convert to hex to read err code" << error;
+                } 
+                if(debug) LOG(INFO) << "Received SDO Response (0x581)" << msg.data[0];
                 // 06 01 00 00 (0x06010000): Object not found (Wrong Index/Sub-index).
                 // 06 02 00 00 (0x06020000): Object does not exist in object dictionary.
                 // 06 01 00 02 (0x06010002): Attempt to write a Read-Only object.
@@ -159,32 +162,41 @@ class vehicle_can{
 
     void configure_canopen(){
 
+
         // NMT frame to entre pre-operation (80)
         send_sdo(0x0000 , {0x80 , 0x00} , 0);
 
+        // ENABLE WRITES TO EEPROM (Turn "Save" mode ON)
+        // Index: 0x332F, Sub: 0x00, Value: 1 (Non-zero)
+        send_sdo_write(0x332F, 0x00, 1);
+
         // Disable RPDO1
-        send_sdo_write(0x1400 , 0x01, 0x201 | 0x80000000);
-        send_sdo_write(0x1600 , 0x00, 0);
+        // send_sdo_write(0x1400 , 0x01, 0x201 | 0x80000000);
+        send_sdo_write(0x1601 , 0x00, 0);
 
         // Map throttle to sub index 1 on 0x1600
         //[16-bit Length] [Sub-index] [Index Low] [Index High]
-        send_sdo_write(0x1600 , 0x01 , 0x32180010);
+        send_sdo_write(0x1601 , 0x01 , 0x32180010);
 
         // for brake
-        send_sdo_write(0x1600 , 0x02 , 0x32190010);
+        send_sdo_write(0x1601 , 0x02 , 0x32190010);
 
         // enable RPDO1
-        send_sdo_write(0x1600 , 0x00 , 2);
-        send_sdo_write(0x1400 , 0x01, 0x201);
+        send_sdo_write(0x1601 , 0x00 , 2);
+        // send_sdo_write(0x1400 , 0x01, 0x201);
 
         // TPDO -- First Disable the COBid - then write in it - then enable
-        send_sdo_write(0x1800, 0x01, 0x181 | 0x80000000);
+        // send_sdo_write(0x1800, 0x01, 0x181 | 0x80000000);
         configure_tpdo(0, 0x1A00,  0x1800); // Vars 0-3  1800 is communication parameter
         send_sdo_write(0x1800, 0x01, 0x181);
 
         send_sdo_write(0x1801, 0x01, 0x281 | 0x80000000);
         configure_tpdo(4, 0x1A01, 0x1801); // Vars 4-7
         send_sdo_write(0x1801, 0x01, 0x281);
+
+        // DISABLE WRITES TO EEPROM (Turn "Save" mode OFF)
+        // Index: 0x332F, Sub: 0x00, Value: 0
+        send_sdo_write(0x332F, 0x00, 0);
 
         // 3. Enter Operational Mode (Start Processing)
         // ID 000 (NMT), Data: 01 (Start), 00 (All Nodes)
@@ -215,7 +227,7 @@ class vehicle_can{
         // Subindex 2 (Type) = 255 (Async)
         send_sdo_write(comm_obj, 0x02, 0xFF, 1); // 1 byte
         // Subindex 5 (Timer) = 50ms
-        send_sdo_write(comm_obj, 0x05, 50, 2); // 2 bytes
+        // send_sdo_write(comm_obj, 0x05, 50, 2); // 2 bytes  // err code 518
 
         // Enable TPDO (Write count)
         send_sdo_write(map_obj, 0x00, count);
