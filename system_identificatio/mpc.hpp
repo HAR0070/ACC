@@ -724,8 +724,8 @@ class StateSpaceModel
     if (exitflag == 0 || exitflag == 1) del_u = (l->L0t*l->eta)(0,0);
 
         if (p.debug){
-          std::cout<< "exitflag is " << exitflag << std::endl;
-          std::cout<< "del_u" << del_u << " " << l->L0t*l->eta << std::endl;
+            std::cout<< "exitflag is " << exitflag << std::endl;
+            std::cout<< "del_u" << del_u << " " << l->L0t*l->eta << std::endl;
         }
 
     return std::make_tuple(mode , u + del_u) ;
