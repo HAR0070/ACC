@@ -87,7 +87,7 @@ public:
         std::vector<CanMessage> output;
         ZCAN_Receive_Data rx_msgs[2000];
 
-        int num_rx = ZCAN_Receive(ch_handles[channel_idx], rx_msgs, 2000, 0);
+        int num_rx = ZCAN_Receive(ch_handles[channel_idx], rx_msgs, 20, 0);
 
         for (int i = 0; i < num_rx; i++) {
             CanMessage msg;

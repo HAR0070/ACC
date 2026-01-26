@@ -30,4 +30,10 @@ build/*
 install/*
 log/*
 logs/*
+<<<<<<< HEAD
 >>>>>>> a9ce8cf (working radar v0 only 1 point a time)
+=======
+
+bags/
+
+>>>>>>> c2968ba (Perfectly working throttle and steerin in velocity mode, not braking because of vehicle settings - first data collection done here - had fixed sampling frequency issues for same)
