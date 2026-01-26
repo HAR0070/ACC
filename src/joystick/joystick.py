@@ -150,7 +150,7 @@ class steering_fb(Node):
     def timer_callback( self ):
 
         try:
-            # This is CRITICAL must pump the event queue.
+            # must pump the event queue.
             pygame.event.pump()
             
             self.steering = self.controller.get_axis(0)

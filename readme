@@ -136,3 +136,16 @@ Byte 4: 0x3207 (Byte 0) -> Motor_RPM Low Byte
 Byte 5: 0x3207 (Byte 1) -> Motor_RPM High Byte
 Byte 6: 0x3209 (Byte 0) -> Current_RMS Low Byte 
 Byte 7: 0x3209 (Byte 1) -> Current_RMS High Byte
+
+## Finally we are reading feedback using SDO causing around ~10ms delay
+
+Also while using steering and vehicle can - if we loose some data point its ok
+But with radar it isnt - so we will have to change the can driver architecture for adding radar
+
+ie. there should be continously operating function which calls feedback and stores data
+and we use the already read buffer -- we shouldnt request to read buffer individually for steering, vehicle and radar
+
+
+The CANFD device can send non-header data even faster than with header 
+The speed is defined by Dbit rate -- if it doesnt match - you will get no feedback  -- this is what happened with steering. 
+Check it

@@ -68,13 +68,13 @@ private:
     size_t count_;
 
     void timer_callback(){
-        auto t_start = std::chrono::steady_clock::now();
+        // auto t_start = std::chrono::steady_clock::now();
 
         steering->steering_feedback();
         auto steering_fb = std_msgs::msg::Float32MultiArray();
 
-        auto t_steering = std::chrono::steady_clock::now();
-        double steering_ms = std::chrono::duration<double, std::milli>(t_steering - t_start).count();
+        // auto t_steering = std::chrono::steady_clock::now();
+        // double steering_ms = std::chrono::duration<double, std::milli>(t_steering - t_start).count();
 
         steering_fb.data.push_back(steering->fb.pos);
         steering_fb.data.push_back(steering->fb.spd);
@@ -89,8 +89,8 @@ private:
         vehicle->read_feedback();
         auto vehicle_fb = std_msgs::msg::Float32MultiArray();
 
-        auto t_vehicle = std::chrono::steady_clock::now();
-        double vehicle_ms = std::chrono::duration<double, std::milli>(t_vehicle - t_steering).count();
+        // auto t_vehicle = std::chrono::steady_clock::now();
+        // double vehicle_ms = std::chrono::duration<double, std::milli>(t_vehicle - t_steering).count();
 
         vehicle_fb.data.push_back(vehicle->fb.throttle);
         vehicle_fb.data.push_back(vehicle->fb.brake);
@@ -114,8 +114,8 @@ private:
         // vehicle->fb.current);
 
         // Log the times
-        RCLCPP_INFO(this->get_logger(), " Steering: %.2fms | Vehicle: %.2fms", 
-                steering_ms, vehicle_ms);
+        // RCLCPP_INFO(this->get_logger(), " Steering: %.2fms | Vehicle: %.2fms", 
+        //         steering_ms, vehicle_ms);
 
     }
 

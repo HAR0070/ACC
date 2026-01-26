@@ -59,12 +59,19 @@ public:
         for(int i=0; i<2; i++) {
             ZCAN_SetResistanceEnable(device_handle, i, 1);
             ZCAN_SetAbitBaud(device_handle, i, baudrates[i]);
-            ZCAN_SetDbitBaud(device_handle, i, 5000000);
-            ZCAN_SetCANFDStandard(device_handle, i, 0);
 
             ZCAN_CHANNEL_INIT_CONFIG cfg;
             memset(&cfg, 0, sizeof(cfg));
-            cfg.can_type = TYPE_CANFD;
+
+            if (i ==0){
+                cfg.can_type = TYPE_CAN;
+            }
+            else {
+                ZCAN_SetDbitBaud(device_handle, i, 5000000);
+                ZCAN_SetCANFDStandard(device_handle, i, 0);
+                cfg.can_type = TYPE_CANFD;
+            }
+            
             cfg.canfd.mode = 0;
             cfg.canfd.acc_mask = 0xFFFFFFFF;
 

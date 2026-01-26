@@ -23,3 +23,5 @@ steering:
 vehicle:
   debug: false
   can_line: "can2"
+
+# can2 is can FD and 1 isn't - so steering has to go in 1
