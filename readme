@@ -149,3 +149,4 @@ and we use the already read buffer -- we shouldnt request to read buffer individ
 The CANFD device can send non-header data even faster than with header 
 The speed is defined by Dbit rate -- if it doesnt match - you will get no feedback  -- this is what happened with steering. 
 Check it
+

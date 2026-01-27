@@ -45,14 +45,12 @@ public:
         }
 
         if (debug) {
-            LOG(INFO) << "baud are " << baudrates[0] << baudrates[1]; 
-            
+            LOG(INFO) << "baud are " << baudrates[0] << " " << baudrates[1]; 
         }
 
         device_handle = ZCAN_OpenDevice(DEVICE_TYPE, 0, 0);
         if (!device_handle) {
             LOG(FATAL) << "Failed to open USBCAN Device!";
-            // LOG(FATAL) << "ZCAN_GetLastError" << ZCAN_GetLastError() ; 
             return;
         }
 
@@ -63,17 +61,20 @@ public:
             ZCAN_CHANNEL_INIT_CONFIG cfg;
             memset(&cfg, 0, sizeof(cfg));
 
-            if (i ==0){
+            if (i == 0){
+                // Channel 0: Standard CAN
                 cfg.can_type = TYPE_CAN;
+                cfg.can.mode = 0; 
+                cfg.can.acc_mask = 0xFFFFFFFF;
             }
             else {
-                ZCAN_SetDbitBaud(device_handle, i, 5000000);
-                ZCAN_SetCANFDStandard(device_handle, i, 0);
+                // Channel 1: CAN FD
+                ZCAN_SetDbitBaud(device_handle, 1, 5000000);
+                ZCAN_SetCANFDStandard(device_handle, 1, 0);
                 cfg.can_type = TYPE_CANFD;
+                cfg.canfd.mode = 0;
+                cfg.canfd.acc_mask = 0xFFFFFFFF;
             }
-            
-            cfg.canfd.mode = 0;
-            cfg.canfd.acc_mask = 0xFFFFFFFF;
 
             ch_handles[i] = ZCAN_InitCAN(device_handle, i, &cfg);
 
@@ -92,59 +93,111 @@ public:
     // Returns ALL messages in buffer
     std::vector<CanMessage> read_all_messages(int channel_idx) {
         std::vector<CanMessage> output;
-        ZCAN_Receive_Data rx_msgs[2000];
 
-        int num_rx = ZCAN_Receive(ch_handles[channel_idx], rx_msgs, 20, 0);
+        if (channel_idx == 0) {
+            // --- STANDARD CAN ---
+            ZCAN_Receive_Data rx_msgs[2000];
+            int num_rx = ZCAN_Receive(ch_handles[channel_idx], rx_msgs, 2000, 0); // Corrected len from 20 to 2000
 
-        for (int i = 0; i < num_rx; i++) {
-            CanMessage msg;
-            msg.id = rx_msgs[i].frame.can_id;
+            for (int i = 0; i < num_rx; i++) {
+                CanMessage msg;
+                msg.id = rx_msgs[i].frame.can_id;
+                msg.timestamp = rx_msgs[i].timestamp;
 
-            if (debug) LOG(INFO) << "feedback call received " << msg.id ;
-            msg.timestamp = rx_msgs[i].timestamp;
-
-            for(int k=0; k<rx_msgs[i].frame.can_dlc; k++) {
-                msg.data.push_back(rx_msgs[i].frame.data[k]);
+                for(int k=0; k < rx_msgs[i].frame.can_dlc; k++) {
+                    msg.data.push_back(rx_msgs[i].frame.data[k]);
+                }
+                
+                if (debug) LOG(INFO) << "Std feedback: " << msg.id;
+                output.push_back(msg);
             }
-            output.push_back(msg);
+        }
+        else {
+            // --- CAN FD ---
+            ZCAN_ReceiveFD_Data rx_msgs[2000];
+            int num_rx = ZCAN_ReceiveFD(ch_handles[channel_idx], rx_msgs, 2000, 0); // Corrected len
+
+            for (int i = 0; i < num_rx; i++) {
+                CanMessage msg;
+                msg.id = rx_msgs[i].frame.can_id;
+                msg.timestamp = rx_msgs[i].timestamp;
+
+                for(int k=0; k < rx_msgs[i].frame.len; k++) {
+                    msg.data.push_back(rx_msgs[i].frame.data[k]);
+                }
+
+                if (debug) LOG(INFO) << "FD feedback: " << msg.id;
+                output.push_back(msg);
+            }
         }
         return output;
     }
 
     // Sends Vector-based command
     void send_ext_command(CanCommand &cmd){
-        ZCAN_Transmit_Data tx_msg;
-        memset(&tx_msg, 0, sizeof(tx_msg));
 
-        // tx_msg.frame.can_id = cmd.can_id;
-        tx_msg.frame.can_id = cmd.can_id | 0x80000000;  // extended frame  - 30th bit should be high
-        tx_msg.frame.can_dlc = cmd.data.size();
-        tx_msg.transmit_type = cmd.transmit_type;
+        if (cmd.can_line == 0) {
+            // --- STANDARD CAN ---
+            ZCAN_Transmit_Data tx_msg;
+            memset(&tx_msg, 0, sizeof(tx_msg));
+            tx_msg.frame.can_id = cmd.can_id | 0x80000000; 
+            
+            tx_msg.frame.can_dlc = cmd.data.size();
+            
+            tx_msg.transmit_type = cmd.transmit_type;
 
-        // if (debug) LOG(INFO) << "extebded can_id is " << cmd.can_id << "data size" << cmd.data.size();
-
-        for(size_t i=0; i < cmd.data.size(); i++) {
-            tx_msg.frame.data[i] = cmd.data[i];
+            for(size_t i=0; i < cmd.data.size(); i++) {
+                tx_msg.frame.data[i] = cmd.data[i];
+            }
+            ZCAN_Transmit(ch_handles[cmd.can_line], &tx_msg, 1);
         }
+        else {
+            // --- CAN FD ---
+            ZCAN_TransmitFD_Data tx_msg;
+            memset(&tx_msg, 0, sizeof(tx_msg));
+            tx_msg.frame.can_id = cmd.can_id | 0x80000000; 
+            
+            tx_msg.frame.len = cmd.data.size();
+            
+            tx_msg.transmit_type = cmd.transmit_type;
 
-        ZCAN_Transmit(ch_handles[cmd.can_line], &tx_msg, 1);
+            for(size_t i=0; i < cmd.data.size(); i++) {
+                tx_msg.frame.data[i] = cmd.data[i];
+            }
+            ZCAN_TransmitFD(ch_handles[cmd.can_line], &tx_msg, 1);
+        } 
     }
 
     void send_command(CanCommand &cmd){
-        ZCAN_Transmit_Data tx_msg;
-        memset(&tx_msg, 0, sizeof(tx_msg));
+        if (cmd.can_line == 0) {
+            // --- STANDARD CAN ---
+            ZCAN_Transmit_Data tx_msg;
+            memset(&tx_msg, 0, sizeof(tx_msg));
+            tx_msg.frame.can_id = cmd.can_id; 
+            
+            tx_msg.frame.can_dlc = cmd.data.size();
+            
+            tx_msg.transmit_type = cmd.transmit_type;
 
-        // tx_msg.frame.can_id = cmd.can_id;
-        tx_msg.frame.can_id = cmd.can_id ;// this is 11 bit identifier
-        tx_msg.frame.can_dlc = cmd.data.size();
-        tx_msg.transmit_type = cmd.transmit_type;
-
-        if (debug) LOG(INFO) << "can_id is " << cmd.can_id << "data size" << cmd.data.size();
-
-        for(size_t i=0; i < cmd.data.size(); i++) {
-            tx_msg.frame.data[i] = cmd.data[i];
+            for(size_t i=0; i < cmd.data.size(); i++) {
+                tx_msg.frame.data[i] = cmd.data[i];
+            }
+            ZCAN_Transmit(ch_handles[cmd.can_line], &tx_msg, 1);
         }
+        else {
+            // --- CAN FD ---
+            ZCAN_TransmitFD_Data tx_msg;
+            memset(&tx_msg, 0, sizeof(tx_msg));
+            tx_msg.frame.can_id = cmd.can_id; 
+            
+            tx_msg.frame.len = cmd.data.size();
+            
+            tx_msg.transmit_type = cmd.transmit_type;
 
-        ZCAN_Transmit(ch_handles[cmd.can_line], &tx_msg, 1);
+            for(size_t i=0; i < cmd.data.size(); i++) {
+                tx_msg.frame.data[i] = cmd.data[i];
+            }
+            ZCAN_TransmitFD(ch_handles[cmd.can_line], &tx_msg, 1);
+        }
     }
 };

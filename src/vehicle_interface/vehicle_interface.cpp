@@ -147,7 +147,7 @@ int main(int argc , char * argv[]){
     std::string config_path = share_dir + "/config/can_config.yaml";
 
     // FLAGS_log_dir = share_dir+ "../../logs";
-    // FLAGS_logtostderr = 1;
+    FLAGS_logtostderr = 1;
     google::InitGoogleLogging(argv[0]);
 
     can_handler driver(config_path);

@@ -1,7 +1,7 @@
 
 --- 
 
-debug: false
+debug: true
 
 can1:
   baud_rate: 1000000 
@@ -14,14 +14,14 @@ radar:
   can_line: "can2"
 
 steering: 
-  debug: false
+  debug: true
   can_line: "can1"
   motor_id: 104
   mode: 3
 
 
 vehicle:
-  debug: false
+  debug: true
   can_line: "can2"
 
 # can2 is can FD and 1 isn't - so steering has to go in 1

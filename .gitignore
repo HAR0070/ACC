@@ -36,4 +36,8 @@ logs/*
 
 bags/
 
+<<<<<<< HEAD
 >>>>>>> c2968ba (Perfectly working throttle and steerin in velocity mode, not braking because of vehicle settings - first data collection done here - had fixed sampling frequency issues for same)
+=======
+*.mcap
+>>>>>>> 89e1476 (canfd and can seperatted but not working)
