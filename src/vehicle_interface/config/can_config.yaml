@@ -1,24 +1,20 @@
 
 --- 
 
-debug: true
+debug: false
 
 can1:
   baud_rate: 1000000 
-  canFD: 0
-  canFD_dbaud: 0
 
 can2:
   baud_rate: 1000000
-  canFD: 1     # 1 means CAN FD enabled
-  canFD_dbaud: 5000000
 
 radar:
-  debug: true
+  debug: false
   can_line: "can2"
 
 steering: 
-  debug: true
+  debug: false
   can_line: "can1"
   motor_id: 104
   mode: 3

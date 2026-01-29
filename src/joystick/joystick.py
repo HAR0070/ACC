@@ -59,6 +59,7 @@ class steering_fb(Node):
             self.takeover = self.controller.get_button(5)
             self.reset = self.controller.get_button(4)
             self.throttle = self.controller.get_button(2)
+            self.brake = self.controller.get_button(3)
 
         except Exception as e:
             print(f"couldn't connect to controller: {e}")
@@ -156,9 +157,11 @@ class steering_fb(Node):
             self.takeover = self.controller.get_button(5)
             self.reset = self.controller.get_button(4)
             self.throttle = self.controller.get_axis(2)
+            self.brake = self.controller.get_axis(3)
 
             steering = self.map_axis_to_position(self.steering , 600)
             throttle = self.map_axis_to_position(self.throttle , 32767)
+            brake = self.map_axis_to_position(self.brake , -32767)
             
             # self.get_logger().info(f"throttle read {throttle}")
 
@@ -177,15 +180,15 @@ class steering_fb(Node):
                 raise
 
             # throttle
-            msg_throttle = self.to_twist(throttle)
+            msg_throttle = self.to_twist(throttle, brake)
 
             if cmd_takeover > 0.1 or takeover:
                 self.allow_control = False
             
                 if self.first_time_takeover:
                     self.first_time_takeover = False
-                    msg_steering = self.to_twist(0)
-                    msg_throttle = self.to_twist(0)
+                    msg_steering = self.to_twist(0,-1)
+                    msg_throttle = self.to_twist(0,-32767)
                     self.pub_str.publish(msg_steering)
                     self.pub_accel.publish(msg_throttle)
 
