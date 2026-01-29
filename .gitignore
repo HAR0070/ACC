@@ -31,6 +31,7 @@ install/*
 log/*
 logs/*
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> a9ce8cf (working radar v0 only 1 point a time)
 =======
 
@@ -41,3 +42,5 @@ bags/
 =======
 *.mcap
 >>>>>>> 89e1476 (canfd and can seperatted but not working)
+=======
+>>>>>>> 043d44a (this is supposed to be correct code - but since the device is CANFD it only reads and write in that format -- so no point of tryng to read in normal can -- there is not even function to set baudrate for normal can -- kinda stuck with this for long time -- try something else)

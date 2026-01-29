@@ -47,15 +47,16 @@ public:
     }
 
     void update_radar() {
-        std::vector<CanMessage> msgs = driver->read_all_messages(can_line);
+        std::vector<uint32_t> expected_ids = {0x600, 0x701}; // Radar Status and Detection Data
+        std::vector<CanMessage> msgs = driver->read_message(can_line , expected_ids);
 
         for (const auto& msg : msgs) {
             // ID 0x600: Point cloud status information 
             // This message comes when 1 cycle is completed 
             // so till then its the previous cycles points in the buffer
             if (msg.id == 0x600) {
+                current_points.clear();
                 for (auto const& [id, point] : point_map) {
-                    current_points.clear();
                     // Only add points that received at least Frame 0 (Position)
                     if (point.has_position) {
                         current_points.push_back(point);

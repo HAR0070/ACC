@@ -5,12 +5,16 @@ debug: true
 
 can1:
   baud_rate: 1000000 
+  canFD: 0
+  canFD_dbaud: 0
 
 can2:
   baud_rate: 1000000
+  canFD: 1     # 1 means CAN FD enabled
+  canFD_dbaud: 5000000
 
 radar:
-  debug: false
+  debug: true
   can_line: "can2"
 
 steering: 
@@ -21,7 +25,5 @@ steering:
 
 
 vehicle:
-  debug: true
+  debug: false
   can_line: "can2"
-
-# can2 is can FD and 1 isn't - so steering has to go in 1

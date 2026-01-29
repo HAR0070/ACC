@@ -62,7 +62,7 @@ sudo nano /etc/udev/rules.d/99-canfd.rules
 SUBSYSTEM=="usb", ATTR{idVendor}=="04d8", ATTR{idProduct}=="0053", MODE="0666"
 
 Radar frequency is ==    
-Its lower than 20Hz -- so there might be lag in radar data - shouldnt be a problem
+Its lower than 20Hz -- so there might be lag in radar data - shouldn't be a problem
 
 radar visualization code is same as written by muni 
 
@@ -73,80 +73,7 @@ for IMU reference - https://docs.fixposition.com/fd/installation-and-usage
 https://github.com/fixposition/fixposition_driver
 
 
-in steering can driver - 
 
-for(const auto& msg : all_msgs) {
-
-            if(debug) LOG(INFO) << "pile has id " << msg.id << "these are maybe extended";
-
-            if (msg.id != expected_id or ) continue;  this line was commented 
-            // thats why when working with both can - steering had issue
-            // and it was saying steering fb received 
-
-If we have to give 0 torque command then feedback id might also change 
-- so have to collect fb from both
-
-U also need to write destructor for the Can handler - so that we dont need to unplug after stopping every time
-
-
-Make Sure the vehicle controller has Node id = 1 , change curtis can parameters accordingly
-
-
-
-
-1. RPDO 1 Configuration (Command)Command: Write 0x1400 Sub 1 (RPDO1 COB-ID) $\rightarrow$ Value 0x80000201 (Disable)Response: Timed out ("Didn't receive SDO feedback")Result: Unknown (likely ignored or failed).
-Command: Write 0x1600 Sub 0 (RPDO1 Mapping Count) $\rightarrow$ Value 0 (Disable Map)Response: ERROR 33554694Meaning: 0x06010002 = Attempt to write a read-only object.Conclusion: You cannot change the number of mapped items.
-Command: Write 0x1600 Sub 1 (Map Slot 1) $\rightarrow$ Value 0x32180010 (Throttle)Response: ERROR 1090520070Meaning: 0x06040041 = Object cannot be mapped to the PDO.Conclusion: The controller rejects mapping this specific variable (or any variable) here.
-Command: Write 0x1600 Sub 2 (Map Slot 2) $\rightarrow$ Value 0x32190010 (Brake)Response: ERROR 1090520070 (Object cannot be mapped).
-Command: Write 0x1600 Sub 0 (Map Count) $\rightarrow$ Value 2Response: ERROR 33554694 (Read Only).
-Command: Write 0x1400 Sub 1 (RPDO1 COB-ID) $\rightarrow$ Value 0x201 (Enable)Response: ERROR 33554694 (Read Only).Conclusion: You cannot change the COB-ID of RPDO1. It is fixed to 0x201 (default).
-
-2. TPDO 1 Configuration (Feedback)Command: Write 0x1800 Sub 1 (TPDO1 COB-ID) $\rightarrow$ Value 0x80000181 (Disable)Response: Success (Accepted).Note: You successfully disabled TPDO1 transmission temporarily.
-Command: Write 0x1A00 Sub 0 (TPDO1 Map Count) $\rightarrow$ Value 0Response: ERROR 33554694 (Read Only).Conclusion: Even though you disabled the PDO, the mapping table 0x1A00 is Permanently Read-Only in firmware.
-Command: Write 0x1A00 Sub 1 through Sub 4 (Map Throttle, Brake, Speed, Accel)Response: ERROR 1090520070 (Object cannot be mapped) for ALL attempts.
-Command: Write 0x1800 Sub 2 (Trans Type) $\rightarrow$ Value 0xFF (Async)Response: Success (Accepted).
-Command: Write 0x1800 Sub 5 (Event Timer) $\rightarrow$ Value 50 (ms)Response: ERROR 518Meaning: 0x06020000 = Object does not exist in the object dictionary.Conclusion: TPDO1 does not support an Event Timer on this device.
-Command: Write 0x1A00 Sub 0 (Enable Map) $\rightarrow$ Value 4Response: ERROR 33554694 (Read Only).
-
-Command: Write 0x1800 Sub 1 (TPDO1 COB-ID) $\rightarrow$ Value 0x181 (Enable)Response: Success.3. TPDO 2 Configuration (Feedback)Command: Write 0x1801 Sub 1 (TPDO2 COB-ID) $\rightarrow$ Value 0x80000281 (Disable)Response: Success.
-Command: Write 0x1A01 Sub 0 (Map Count) $\rightarrow$ Value 0Response: Success (Accepted!).Note: Unlike TPDO1, the controller allowed you to clear the count for TPDO2.
-Command: Write 0x1A01 Sub 1 (Map RPM) $\rightarrow$ Value 0x32070010Response: ERROR 33554694 (Read Only).Conclusion: While it let you clear the count, it refused to let you add a new mapping. This is inconsistent behavior by the controller but the result is the same: Mapping Failed.
-
-Command: Write 0x1A01 Sub 2, 4Response: ERROR 1090520070 (Cannot be mapped).Command: Write 0x1A01 Sub 3Response: Timed out.
-Command: Write 0x1801 Sub 5 (Event Timer) $\rightarrow$ Value 50Response: ERROR 518 (Object does not exist).
-Command: Write 0x1A01 Sub 0 (Enable Map)Response: ERROR 33554694 (Read Only).
-Command: Write 0x1801 Sub 1 (Enable TPDO2) $\rightarrow$ Value 0x281Response: Success.Summary of ErrorsRead Only (0x06010002): The Mapping Objects (0x1600, 0x1A00, 0x1A01) are locked by the firmware. You cannot change what data is in the PDOs.Object Does Not Exist (0x06020000): The Event Timer (Sub-index 5) does not exist for these PDOs. You cannot set a frequency (e.g., 50ms) using this method.Cannot Be Mapped (0x06040041): The specific variables you tried to map are not allowed in the PDOs by the manufacturer.
-
-
-
-RPDO 1 (Command You Send to Drive)
-Byte 0: 0x33D1 (Byte 0) - Likely VCL_App_Var_1 (User Defined)
-Byte 1: 0x33D1 (Byte 1)
-Byte 2: 0x3218 (Byte 0) -> VCL_Throttle Low Byte
-Byte 3: 0x3218 (Byte 1) -> VCL_Throttle High Byte
-Byte 4: 0x304E (Byte 0) -> MotorTemp_Hot (?)
-
-
-TPDO 1 (Feedback from Drive)
-Byte 0: 0x33D3 (Byte 0) - Likely VCL_App_Var_3
-Byte 1: 0x33D3 (Byte 1)
-Byte 2: 0x321C -> PD_Current (Proportional Driver Current) 
-Byte 3: 0x3226 -> Switch State (Bitmask of all switches) 
-Byte 4: 0x3207 (Byte 0) -> Motor_RPM Low Byte 
-Byte 5: 0x3207 (Byte 1) -> Motor_RPM High Byte
-Byte 6: 0x3209 (Byte 0) -> Current_RMS Low Byte 
-Byte 7: 0x3209 (Byte 1) -> Current_RMS High Byte
-
-## Finally we are reading feedback using SDO causing around ~10ms delay
-
-Also while using steering and vehicle can - if we loose some data point its ok
-But with radar it isnt - so we will have to change the can driver architecture for adding radar
-
-ie. there should be continously operating function which calls feedback and stores data
-and we use the already read buffer -- we shouldnt request to read buffer individually for steering, vehicle and radar
-
-
-The CANFD device can send non-header data even faster than with header 
-The speed is defined by Dbit rate -- if it doesnt match - you will get no feedback  -- this is what happened with steering. 
-Check it
-
+// things to check --
+the can id that is comming int he buffer
+Why is motor giving feedback in 2968
