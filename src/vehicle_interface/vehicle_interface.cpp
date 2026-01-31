@@ -110,8 +110,8 @@ private:
         // vehicle->fb.throttle,
         // vehicle->fb.brake,
         // vehicle->fb.speed,
-        vehicle->fb.motor_rpm,
-        vehicle->fb.current);
+        (int)vehicle->fb.motor_rpm,
+        (int)vehicle->fb.current);
 
         // // Log the times
         // RCLCPP_INFO(this->get_logger(), " Steering: %.2fms | Vehicle: %.2fms", 

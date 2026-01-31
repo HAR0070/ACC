@@ -1,32 +1,34 @@
 
-First we will test this code with controller 
+First we will test this code with controller
 
-Then use it with the main driver 
+Then use it with the main driver
 
-Keep in min -- Ak80  uses extended can id and feedback is in 298 id
+Keep in min -- Ak80  uses extended can id and feedback is in 298 id  --- feedback comes in 104 | 41>>8 id  or 0x29 >> 8
+In cubemars setting - I had kept Timeout to be 1 second -- thats why even after takeover the force felt huge for 1 second
+Now i reduced it to 150ms -- should change this in  car also
 
 The radar uses FMCW ie transmittion signal freq changes over time - 
-    - beat frequency formed by delayed echo gives the range 
+    - beat frequency formed by delayed echo gives the range
     - Doppler shift gives the velocity   -- ie you are getting relative speed
-    So both are independently measured 
-Radar gives a 4D point cloud 
+    So both are independently measured
+Radar gives a 4D point cloud
 
 Distance resolution is 0.1m   precesion is +-0.05m
 
 Speed range +-18m/s   speed ratio 0.25m/s   precesion +- 0.12m/s
 
-operation freq is 100ms 
+operation freq is 100ms
 
 Link to datasheet - https://robu.in/wp-content/uploads/2024/11/R164169-SR75-77GHz-Technical-White-Paper.pdf
 
 
-If steering feedback is not comming the run main.cpp  and c which feedback id is being ued -- since its hardcoded right now to 2968 
+If steering feedback is not comming the run main.cpp  and c which feedback id is being ued -- since its hardcoded right now to 2968
 
 Testing
 1. Steering
 2. Feedback from vehicle
-3. Throttle and brake 
-4. Radar 
+3. Throttle and brake
+4. Radar
 
 
 x86-c/
@@ -61,10 +63,10 @@ sudo nano /etc/udev/rules.d/99-canfd.rules
 
 SUBSYSTEM=="usb", ATTR{idVendor}=="04d8", ATTR{idProduct}=="0053", MODE="0666"
 
-Radar frequency is ==    
+Radar frequency is ==
 Its lower than 20Hz -- so there might be lag in radar data - shouldnt be a problem
 
-radar visualization code is same as written by muni 
+radar visualization code is same as written by muni
 
 To run the IMU package - source the package and in  /home/har/Documents/Auto_drive/steering_motor/imu_ws  -- add it to bashrc temporarily
 then run  - ros2 launch fixposition_driver_ros2 node.launch
@@ -73,17 +75,17 @@ for IMU reference - https://docs.fixposition.com/fd/installation-and-usage
 https://github.com/fixposition/fixposition_driver
 
 
-in steering can driver - 
+in steering can driver -
 
 for(const auto& msg : all_msgs) {
 
             if(debug) LOG(INFO) << "pile has id " << msg.id << "these are maybe extended";
 
-            if (msg.id != expected_id or ) continue;  this line was commented 
+            if (msg.id != expected_id or ) continue;  this line was commented
             // thats why when working with both can - steering had issue
-            // and it was saying steering fb received 
+            // and it was saying steering fb received
 
-If we have to give 0 torque command then feedback id might also change 
+If we have to give 0 torque command then feedback id might also change
 - so have to collect fb from both
 
 U also need to write destructor for the Can handler - so that we dont need to unplug after stopping every time
@@ -130,13 +132,24 @@ Byte 4: 0x304E (Byte 0) -> MotorTemp_Hot (?)
 TPDO 1 (Feedback from Drive)
 Byte 0: 0x33D3 (Byte 0) - Likely VCL_App_Var_3
 Byte 1: 0x33D3 (Byte 1)
-Byte 2: 0x321C -> PD_Current (Proportional Driver Current) 
-Byte 3: 0x3226 -> Switch State (Bitmask of all switches) 
-Byte 4: 0x3207 (Byte 0) -> Motor_RPM Low Byte 
+Byte 2: 0x321C -> PD_Current (Proportional Driver Current)
+Byte 3: 0x3226 -> Switch State (Bitmask of all switches)
+Byte 4: 0x3207 (Byte 0) -> Motor_RPM Low Byte
 Byte 5: 0x3207 (Byte 1) -> Motor_RPM High Byte
-Byte 6: 0x3209 (Byte 0) -> Current_RMS Low Byte 
+Byte 6: 0x3209 (Byte 0) -> Current_RMS Low Byte
 Byte 7: 0x3209 (Byte 1) -> Current_RMS High Byte
 
-what are you trying to do? SDO Q is becoming large -- current and rpm feedback we will get 
+0	134230532	0x08003204	0x3204	00	Analog 1 Input	Low Byte of Analog 1 (Pin 24)
+1	134296106	0x0801322A	0x322A	01	Controller Temp	 High Byte of Controller Internal Temp
+2	134230570	0x0800322A	0x322A	00	Controller Temp	Low Byte of Controller Internal Temp
+3	134296106	0x0801322A	0x322A	01	Controller Temp	High Byte (Repeated)
+4	134230539	0x0800320B	0x320B	00	Motor Temp	Low Byte of Motor Temperature
+5	1342966075*	0x0801320B	0x320B	01	Motor Temp	High Byte of Motor Temperature
+6	1342966087*	0x08013217	0x3217	01	Pot2 Raw	High Byte of Brake Pot (Pin 17)
+7	134296085	0x08013215	0x3215	01	Throttle Raw High Byte of Throttle Pot (Pin 16)
+
+
+
+what are you trying to do? SDO Q is becoming large -- current and rpm feedback we will get
 so we can only take that --  send throttle also through PDO and read feedback through PDO
-send brake through SDO   -- we cant read throttle feedback if its so - because in 1 loop controller can process only 1 SDO 
+send brake through SDO   -- we cant read throttle feedback if its so - because in 1 loop controller can process only 1 SDO

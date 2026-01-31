@@ -57,7 +57,7 @@ public:
         // uint32_t expected_id_torque = 2968 | EFF_FLAG;
         uint32_t extended_id = MOTOR_ID | (mode << 8) | EFF_FLAG ;
         uint32_t non_extended_id = MOTOR_ID | (mode << 8) | EFF_FLAG ;
-        std::set<uint32_t> expected_id = { 2147494248};  // extended_id , non_extended_id , id_vel ,    
+        std::set<uint32_t> expected_id = { (MOTOR_ID | (0x29 << 8) | EFF_FLAG) };  // extended_id , non_extended_id , id_vel ,     2147494248
 
         if (all_msgs.empty()) {
             if (debug) LOG(INFO) << "No steering feedback messages received.";
