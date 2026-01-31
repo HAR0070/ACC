@@ -28,6 +28,8 @@ private:
     // Until the next 0x600 frame comes - signalling completetion of 1 cycle
     std::map<int, RadarPoint> point_map;
 
+    std::set<uint32_t> expected_id = {0x600 , 0x701 };
+
 public:
     // This buffer holds the points from the latest update
     std::vector<RadarPoint> current_points;
@@ -47,7 +49,7 @@ public:
     }
 
     void update_radar() {
-        std::vector<CanMessage> msgs = driver->read_all_messages(can_line);
+        std::vector<CanMessage> msgs = driver->read_feedback(can_line , expected_id);
 
         for (const auto& msg : msgs) {
             // ID 0x600: Point cloud status information 

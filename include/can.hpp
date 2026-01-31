@@ -6,6 +6,7 @@
 #include <glog/logging.h>
 #include <yaml-cpp/yaml.h>
 #include "controlcanfd.h"
+#include <chrono>
 
 #define DEVICE_TYPE 41
 
@@ -13,7 +14,7 @@
 struct CanMessage {
     uint32_t id;
     std::vector<unsigned char> data;
-    uint64_t timestamp;
+    uint64_t timestamp;   // from can device - in microseconds
 };
 
 // Command Struct
@@ -30,6 +31,40 @@ private:
     DEVICE_HANDLE device_handle;
     CHANNEL_HANDLE ch_handles[2];
     bool debug;
+
+    std::vector<CanMessage> q0; 
+    std::vector<CanMessage> q1;
+
+    uint64_t time_now;
+
+    std::vector<CanMessage> process (std::vector<CanMessage> &q , std::set<uint32_t> id){
+        std::vector<CanMessage> output; 
+
+        for (auto it = q.begin(); it !=q.end(); ){
+            if ( id.find(it->id) !=id.end()){
+                output.push_back(*it);
+                it = q.erase(it);
+            } 
+            else{
+                ++it;
+            }
+        }
+        return output;
+    }
+
+    void clean_q (std::vector<CanMessage> *q){
+
+        if (q->empty()) return;
+        // if (q->begin()->timestamp < 500000) return; 
+
+        for (auto it = q->begin(); it != q->end() ; ){
+            if ((time_now - it->timestamp) > 500000){
+                it = q->erase(it);
+            }
+            else ++it; 
+        }
+    }
+
 
 public:
     can_handler(const std::string& config_path) {
@@ -85,6 +120,17 @@ public:
         ZCAN_CloseDevice(device_handle);
     }
 
+    std::vector<CanMessage> read_feedback(int channel_idx , std::set<uint32_t> filter_ids){
+
+        std::vector<CanMessage> &q = (channel_idx == 0) ? q0 : q1 ;
+
+        std::vector<CanMessage> temp = read_all_messages(channel_idx); 
+        clean_q(&q); 
+        q.insert(q.end(), temp.begin(), temp.end()); 
+        return process(q , filter_ids); 
+
+    }
+
     // Returns ALL messages in buffer
     std::vector<CanMessage> read_all_messages(int channel_idx) {
         std::vector<CanMessage> output;
@@ -110,6 +156,7 @@ public:
                 msg.data.push_back(rx_msgs[i].frame.data[k]);
             }
             output.push_back(msg);
+            time_now = msg.timestamp; 
         }
         return output;
     }

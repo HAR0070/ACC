@@ -153,3 +153,9 @@ Byte 7: 0x3209 (Byte 1) -> Current_RMS High Byte
 what are you trying to do? SDO Q is becoming large -- current and rpm feedback we will get
 so we can only take that --  send throttle also through PDO and read feedback through PDO
 send brake through SDO   -- we cant read throttle feedback if its so - because in 1 loop controller can process only 1 SDO
+
+
+
+
+in steering can -- remove the set implementation 
+Get the que implementation in can.hpp 

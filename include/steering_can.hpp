@@ -22,6 +22,8 @@ private:
         int temp;
         int err;
     };
+    const uint32_t EFF_FLAG = 0x80000000;
+    std::set<uint32_t> expected_id = {(MOTOR_ID | (0x29 << 8) | EFF_FLAG)} ;
 
 public:
     motor_fb fb {0};
@@ -46,18 +48,17 @@ public:
 
     void steering_feedback(){
         // Get all messages from the assigned line
-        process_feedback(driver->read_all_messages(can_line));
+        process_feedback(driver->read_feedback(can_line , expected_id));
         if(debug) LOG(INFO) << "req fb from " << can_line;
     }
 
     void process_feedback(const std::vector<CanMessage>& all_msgs){
         // uint32_t expected_id = MOTOR_ID | (mode << 8);
-        const uint32_t EFF_FLAG = 0x80000000;
-        uint32_t id_vel = 2968 | EFF_FLAG;
-        // uint32_t expected_id_torque = 2968 | EFF_FLAG;
-        uint32_t extended_id = MOTOR_ID | (mode << 8) | EFF_FLAG ;
-        uint32_t non_extended_id = MOTOR_ID | (mode << 8) | EFF_FLAG ;
-        std::set<uint32_t> expected_id = { (MOTOR_ID | (0x29 << 8) | EFF_FLAG) };  // extended_id , non_extended_id , id_vel ,     2147494248
+        // uint32_t id_vel = 2968 | EFF_FLAG;
+        // // uint32_t expected_id_torque = 2968 | EFF_FLAG;
+        // uint32_t extended_id = MOTOR_ID | (mode << 8) | EFF_FLAG ;
+        // uint32_t non_extended_id = MOTOR_ID | (mode << 8) | EFF_FLAG ;
+          // extended_id , non_extended_id , id_vel ,     2147494248
 
         if (all_msgs.empty()) {
             if (debug) LOG(INFO) << "No steering feedback messages received.";
