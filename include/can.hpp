@@ -37,17 +37,24 @@ private:
 
     uint64_t time_now;
 
-    std::vector<CanMessage> process (std::vector<CanMessage> &q , std::set<uint32_t> id){
+    std::vector<CanMessage> process (std::vector<CanMessage> &q , std::set<uint32_t> filter_id){
         std::vector<CanMessage> output; 
+        std::set<uint32_t> unique_id; 
 
         for (auto it = q.begin(); it !=q.end(); ){
-            if ( id.find(it->id) !=id.end()){
+            unique_id.insert(it->id);
+
+            if ( filter_id.find(it->id) != filter_id.end()){
                 output.push_back(*it);
                 it = q.erase(it);
             } 
             else{
                 ++it;
             }
+        }
+        if (debug) {
+            LOG(INFO) << "Processed q size " << output.size() << " " << filter_id.size() << " " << *filter_id.begin() ;
+            for (const auto &id : unique_id) LOG(INFO) << "id in que " << id;
         }
         return output;
     }
@@ -125,7 +132,13 @@ public:
         std::vector<CanMessage> &q = (channel_idx == 0) ? q0 : q1 ;
 
         std::vector<CanMessage> temp = read_all_messages(channel_idx); 
+        if (debug) 
+            LOG(INFO) << "size of que is: " << q.size() << "before cleaning";
+        
         clean_q(&q); 
+        if (debug) 
+            LOG(INFO) << "size of que is: " << q.size() << "after cleaning";
+
         q.insert(q.end(), temp.begin(), temp.end()); 
         return process(q , filter_ids); 
 

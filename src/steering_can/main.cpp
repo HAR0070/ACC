@@ -25,9 +25,9 @@ int main(int argc , char* argv[]){
         str.steering_command(1000);
 
         str.steering_feedback();
-        std::cout<< "wt we have " << str.fb.pos << " " << str.fb.cur << " " << str.fb.err << std::endl;
+        // std::cout<< "wt we have " << str.fb.pos << " " << str.fb.cur << " " << str.fb.err << std::endl;
 
-        // LOG(INFO) << "got feedback of " << str.fb.pos << "," << str.fb.spd << "," << str.fb.cur << "," << str.fb.temp;
+        LOG(INFO) << "got feedback of " << str.fb.pos << "," << str.fb.spd << "," << str.fb.cur << "," << str.fb.temp;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }

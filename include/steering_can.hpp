@@ -23,7 +23,7 @@ private:
         int err;
     };
     const uint32_t EFF_FLAG = 0x80000000;
-    std::set<uint32_t> expected_id = {(MOTOR_ID | (0x29 << 8) | EFF_FLAG)} ;
+    std::set<uint32_t> expected_id ;
 
 public:
     motor_fb fb {0};
@@ -39,6 +39,7 @@ public:
             MOTOR_ID  = config["steering"]["motor_id"].as<int>();
             mode = config["steering"]["mode"].as<int>();
             debug = config["steering"]["debug"].as<bool>();
+            expected_id = {(MOTOR_ID | (0x29 << 8) | EFF_FLAG)};
         }
         catch (const std::exception& e){
             LOG(ERROR) << "Steering YAML Error: " << e.what();
@@ -67,12 +68,12 @@ public:
 
         for(const auto& msg : all_msgs) {
 
-            if(debug) LOG(INFO) << "pile has id " << msg.id << "these are maybe extended";
+            LOG(INFO) << "Steering feedback received for ID: " << msg.id;
+            // if(debug) LOG(INFO) << "pile has id " << msg.id << "these are maybe extended";
 
             if (expected_id.find(msg.id) == expected_id.end()) continue;
             if (msg.data.size() < 7) continue;
 
-            LOG(INFO) << "Steering feedback received for ID: " << msg.id;
             const unsigned char* b = msg.data.data();
 
             fb.pos  = (int16_t)((b[0] << 8) | b[1]) * 0.1f;
