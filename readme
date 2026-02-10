@@ -7,7 +7,7 @@ Keep in min -- Ak80  uses extended can id and feedback is in 298 id  --- feedbac
 In cubemars setting - I had kept Timeout to be 1 second -- thats why even after takeover the force felt huge for 1 second
 Now i reduced it to 150ms -- should change this in  car also
 
-The radar uses FMCW ie transmittion signal freq changes over time - 
+The radar uses FMCW ie transmittion signal freq changes over time -
     - beat frequency formed by delayed echo gives the range
     - Doppler shift gives the velocity   -- ie you are getting relative speed
     So both are independently measured
@@ -154,8 +154,5 @@ what are you trying to do? SDO Q is becoming large -- current and rpm feedback w
 so we can only take that --  send throttle also through PDO and read feedback through PDO
 send brake through SDO   -- we cant read throttle feedback if its so - because in 1 loop controller can process only 1 SDO
 
-
-
-
-in steering can -- remove the set implementation 
-Get the que implementation in can.hpp 
+in steering can -- remove the set implementation
+Get the que implementation in can.hpp

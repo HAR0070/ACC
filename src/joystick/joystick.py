@@ -16,10 +16,10 @@ from collections import namedtuple
 DEADZONE = 0.05
 SEND_INTERVAL = 0.05
 
-KP = 10
+KP = 2
 KD = 0.5
 KI = 0.5
-SPD_REF = 6000
+SPD_REF = 4000
 CUR_LIM = 10
 
 fb = namedtuple("fb" , ["pos" , "spd" , "cur"  , "temp" , "err"])
@@ -159,7 +159,7 @@ class steering_fb(Node):
             self.throttle = self.controller.get_axis(2)
             self.brake = self.controller.get_axis(3)
 
-            steering = self.map_axis_to_position(self.steering , 600)
+            steering = self.map_axis_to_position(self.steering , 400)
             throttle = self.map_axis_to_position(self.throttle , 32767)
             brake = self.map_axis_to_position(self.brake , -32767)
             

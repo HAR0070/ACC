@@ -293,20 +293,25 @@ class vehicle_can {
         // Just Listen. No Polling.
         std::vector<CanMessage> msgs = driver->read_feedback(can_line , expected_id);
 
+        uint64_t check_time = 0; 
+
         for (const auto& msg : msgs) {
             // --- TPDO1 (ID 0x181) ---
             if (msg.id == ID_TPDO1 && msg.data.size() >= 8) {
                 // Byte 4-5: Motor RPM (0x3207)
                 // Byte 6-7: Current RMS (0x3209)
-                
-                int16_t raw_rpm = msg.data[4] | (msg.data[5] << 8);
-                int16_t raw_cur = msg.data[6] | (msg.data[7] << 8);
+                if (msg.timestamp > check_time) {
+                    check_time = msg.timestamp; 
 
-                fb.motor_rpm = raw_rpm;
-                fb.current   = raw_cur;
+                    int16_t raw_rpm = msg.data[4] | (msg.data[5] << 8);
+                    int16_t raw_cur = msg.data[6] | (msg.data[7] << 8);
 
-                if (debug) {
-                    LOG_EVERY_N(INFO, 10) << "TPDO1 RX: RPM=" << fb.motor_rpm << " Cur=" << fb.current;
+                    fb.motor_rpm = raw_rpm;
+                    fb.current   = raw_cur;
+
+                    if (debug) {
+                        LOG_EVERY_N(INFO, 10) << "TPDO1 RX: RPM=" << fb.motor_rpm << " Cur=" << fb.current;
+                    }
                 }
             }
             
@@ -314,7 +319,7 @@ class vehicle_can {
             // We still listen to this just to confirm Brake Writes (0x60)
             else if (msg.id == ID_SDO_RX) {
                 if (msg.data[0] == 0x60) {
-                     // Write Success Confirmation
+                    if (debug) LOG(INFO) << "Success message ";
                 }
             }
         }

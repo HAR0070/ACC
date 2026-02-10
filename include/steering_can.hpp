@@ -65,31 +65,36 @@ public:
             if (debug) LOG(INFO) << "No steering feedback messages received.";
             return;
         }
-
+        // Make sure to pick message with highest timestamp
+        uint64_t check_time = 0; 
         for(const auto& msg : all_msgs) {
 
-            LOG(INFO) << "Steering feedback received for ID: " << msg.id;
-            // if(debug) LOG(INFO) << "pile has id " << msg.id << "these are maybe extended";
+            // LOG_EVERY_N(INFO , 100) << "Steering feedback received for ID: " << msg.id;
+            if(debug) LOG(INFO) << "pile has id " << msg.id << "these are maybe extended";
 
-            if (expected_id.find(msg.id) == expected_id.end()) continue;
-            if (msg.data.size() < 7) continue;
+            // if (expected_id.find(msg.id) == expected_id.end()) continue;
+            // if (msg.data.size() < 7) continue;
 
-            const unsigned char* b = msg.data.data();
+            if (msg.timestamp > check_time) {
+                check_time = msg.timestamp; 
+                const unsigned char* b = msg.data.data();
 
-            fb.pos  = (int16_t)((b[0] << 8) | b[1]) * 0.1f;
-            fb.spd  = (int16_t)((b[2] << 8) | b[3]) * 10.0f;
-            fb.cur  = (int16_t)((b[4] << 8) | b[5]) * 0.01f;
-            fb.temp = (int8_t)b[6];
-            fb.err = (int8_t)b[7];
+                fb.pos  = (int16_t)((b[0] << 8) | b[1]) * 0.1f;
+                fb.spd  = (int16_t)((b[2] << 8) | b[3]) * 10.0f;
+                fb.cur  = (int16_t)((b[4] << 8) | b[5]) * 0.01f;
+                fb.temp = (int8_t)b[6];
+                fb.err = (int8_t)b[7];
 
-            if (debug) {
-                LOG(INFO) << "[Steering] Pos:" << fb.pos
-                        << " Spd:" << fb.spd
-                        << " Cur:" << fb.cur
-                        << " Temp:" << fb.temp
-                        << "Err:"   << fb.err;
+                if (debug) {
+                    LOG(INFO) << "[Steering] Pos:" << fb.pos
+                            << " Spd:" << fb.spd
+                            << " Cur:" << fb.cur
+                            << " Temp:" << fb.temp
+                            << "Err:"   << fb.err;
+                }
             }
         }
+
     }
 
     void steering_stop(){
@@ -97,7 +102,7 @@ public:
         // here we command 0 torque - use while takeover is initiated
         CanCommand frame;
         frame.can_line = can_line;
-        frame.transmit_type = 0;
+        frame.transmit_type = 1;  // send and forget
         frame.can_id = MOTOR_ID | (0x01 << 8);
 
         frame.data.push_back((0 >> 24) & 0xFF);
@@ -111,7 +116,7 @@ public:
     void steering_command(long rpm) {
         CanCommand frame;
         frame.can_line = can_line;
-        frame.transmit_type = 0;
+        frame.transmit_type = 1;  // send and forget
         frame.can_id = MOTOR_ID | (0x03 << 8);
 
         frame.data.push_back((rpm >> 24) & 0xFF);
@@ -120,7 +125,8 @@ public:
         frame.data.push_back((rpm)       & 0xFF);
 
         driver->send_ext_command(frame);
-
-        if (debug) LOG(INFO) << "Sent steering RPM:" << rpm;
+        if (debug){
+            LOG_EVERY_N(INFO , 100) << "Sent steering RPM:" << rpm;
+        } 
     }
 };

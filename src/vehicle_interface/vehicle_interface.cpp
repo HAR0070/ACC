@@ -45,7 +45,7 @@ public:
             "/vehicle_throttle" , 10 , std::bind(&vehicle_interface::throttle_callback, this , std::placeholders::_1), sub_opt);
 
         timer_ = this->create_wall_timer(
-            50ms, 
+            20ms, 
             std::bind(&vehicle_interface::timer_callback, this), 
             callback_group_timer_); // Pass group  // full loop runs in 50Hz
 
@@ -70,21 +70,25 @@ private:
     void timer_callback(){
         // auto t_start = std::chrono::steady_clock::now();
 
-        // steering->steering_feedback();
-        // auto steering_fb = std_msgs::msg::Float32MultiArray();
+        steering->steering_feedback();
+        auto steering_fb = std_msgs::msg::Float32MultiArray();
 
-        // // auto t_steering = std::chrono::steady_clock::now();
-        // // double steering_ms = std::chrono::duration<double, std::milli>(t_steering - t_start).count();
+        // auto t_steering = std::chrono::steady_clock::now();
+        // double steering_ms = std::chrono::duration<double, std::milli>(t_steering - t_start).count();
 
-        // steering_fb.data.push_back(steering->fb.pos);
-        // steering_fb.data.push_back(steering->fb.spd);
-        // steering_fb.data.push_back(steering->fb.cur);
-        // steering_fb.data.push_back(steering->fb.temp);
-        // steering_fb.data.push_back(steering->fb.err);
+        steering_fb.data.push_back(steering->fb.pos);
+        steering_fb.data.push_back(steering->fb.spd);
+        steering_fb.data.push_back(steering->fb.cur);
+        steering_fb.data.push_back(steering->fb.temp);
+        steering_fb.data.push_back(steering->fb.err);
 
-        // pub_str_fb->publish(steering_fb);
+        pub_str_fb->publish(steering_fb);
 
-        // RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000, "Steering feedback published");
+        // RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 10, 
+        // "Steering feedback published %.2f , %.2f , %.2f",
+        //         steering->fb.pos , 
+        //         steering->fb.spd , 
+        //         steering->fb.cur);
 
         vehicle->read_feedback();
         auto vehicle_fb = std_msgs::msg::Float32MultiArray();
@@ -92,26 +96,15 @@ private:
         // auto t_vehicle = std::chrono::steady_clock::now();
         // double vehicle_ms = std::chrono::duration<double, std::milli>(t_vehicle - t_steering).count();
 
-        // vehicle_fb.data.push_back(vehicle->fb.throttle);
-        // vehicle_fb.data.push_back(vehicle->fb.brake);
-        // vehicle_fb.data.push_back(vehicle->fb.speed);
-        // vehicle_fb.data.push_back(vehicle->fb.acceleration);
         vehicle_fb.data.push_back(vehicle->fb.motor_rpm);
         vehicle_fb.data.push_back(vehicle->fb.current);
-        // vehicle_fb.data.push_back(vehicle->fb.sys_flags);
-        // vehicle_fb.data.push_back(vehicle->fb.main_state);
 
         pub_vehicle_fb->publish(vehicle_fb);
 
-        // RCLCPP_INFO(this->get_logger() , "Vehicle feedback published");
-        RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
-        // "Vehicle feedback: Thr:%d, Brk:%d, Spd:%d, Acc:%d, RPM:%d, Cur:%d, Flags:%d",
-        "Vehicle feedback: RPM:%d, Cur:%d",
-        // vehicle->fb.throttle,
-        // vehicle->fb.brake,
-        // vehicle->fb.speed,
-        (int)vehicle->fb.motor_rpm,
-        (int)vehicle->fb.current);
+        // RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000,
+        // "Vehicle feedback: RPM:%d, Cur:%d",
+        // (int)vehicle->fb.motor_rpm,
+        // (int)vehicle->fb.current);
 
         // // Log the times
         // RCLCPP_INFO(this->get_logger(), " Steering: %.2fms | Vehicle: %.2fms", 
@@ -122,9 +115,17 @@ private:
     void steering_callback(const geometry_msgs::msg::Twist::SharedPtr msg) const{
 
         // if takeover is initiated -- then we command 0 torque - and stop motor
-        if (msg->linear.y == -1) steering->steering_stop();
+        // if (msg->linear.y == -1) steering->steering_stop();
         
-        else steering->steering_command(msg->linear.x);
+        // else 
+        auto t_str_begin = std::chrono::steady_clock::now();
+
+        steering->steering_command(msg->linear.x);
+
+        auto t_str_end = std::chrono::steady_clock::now();
+
+        double vehicle_ms = std::chrono::duration<double, std::milli>(t_str_end - t_str_begin).count();
+        LOG(INFO) << "published at " << vehicle_ms;
 
         // RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000, "steering sent '%f'" , msg->linear.x);
     }
@@ -158,12 +159,14 @@ int main(int argc , char * argv[]){
 
     auto node = std::make_shared<vehicle_interface>(&str , &veh);
 
-    // CHANGE: Use MultiThreadedExecutor instead of default spin
-    rclcpp::executors::MultiThreadedExecutor executor;
-    executor.add_node(node);
-    executor.spin();
+    // // MultiThreadedExecutor 
+    // rclcpp::executors::MultiThreadedExecutor executor;
+    // executor.add_node(node);
+    // executor.spin();
 
+    rclcpp::spin(node);
     rclcpp::shutdown();
+
     return 0;
 
 }

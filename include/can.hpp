@@ -7,6 +7,7 @@
 #include <yaml-cpp/yaml.h>
 #include "controlcanfd.h"
 #include <chrono>
+#include <mutex>
 
 #define DEVICE_TYPE 41
 
@@ -36,6 +37,7 @@ private:
     std::vector<CanMessage> q1;
 
     uint64_t time_now;
+    // std::mutex can_mutex;
 
     std::vector<CanMessage> process (std::vector<CanMessage> &q , std::set<uint32_t> filter_id){
         std::vector<CanMessage> output; 
@@ -46,7 +48,7 @@ private:
 
             if ( filter_id.find(it->id) != filter_id.end()){
                 output.push_back(*it);
-                it = q.erase(it);
+                it = q.erase(it); 
             } 
             else{
                 ++it;
@@ -65,7 +67,7 @@ private:
         // if (q->begin()->timestamp < 500000) return; 
 
         for (auto it = q->begin(); it != q->end() ; ){
-            if ((time_now - it->timestamp) > 500000){
+            if ((time_now - it->timestamp) > 50000){
                 it = q->erase(it);
             }
             else ++it; 
@@ -128,7 +130,7 @@ public:
     }
 
     std::vector<CanMessage> read_feedback(int channel_idx , std::set<uint32_t> filter_ids){
-
+        // std::lock_guard<std::mutex> lock(can_mutex);
         std::vector<CanMessage> &q = (channel_idx == 0) ? q0 : q1 ;
 
         std::vector<CanMessage> temp = read_all_messages(channel_idx); 
@@ -157,6 +159,7 @@ public:
         ZCAN_Receive_Data rx_msgs[size];
 
         int num_rx = ZCAN_Receive(ch_handles[channel_idx], rx_msgs, size, 2); // 2 ms wait
+        
 
         for (int i = 0; i < num_rx; i++) {
             CanMessage msg;
@@ -174,8 +177,9 @@ public:
         return output;
     }
 
-    // Sends Vector-based command
+    // Sends command
     void send_ext_command(CanCommand &cmd){
+        // std::lock_guard<std::mutex> lock(can_mutex);
         ZCAN_Transmit_Data tx_msg;
         memset(&tx_msg, 0, sizeof(tx_msg));
 
@@ -184,17 +188,26 @@ public:
         tx_msg.frame.can_dlc = cmd.data.size();
         tx_msg.transmit_type = cmd.transmit_type;
 
-        // if (debug) LOG(INFO) << "extebded can_id is " << cmd.can_id << "data size" << cmd.data.size();
+        if (debug) LOG(INFO) << "extebded can_id is " << cmd.can_id << "data size" << cmd.data.size();
 
         for(size_t i=0; i < cmd.data.size(); i++) {
             tx_msg.frame.data[i] = cmd.data[i];
         }
 
-        ZCAN_Transmit(ch_handles[cmd.can_line], &tx_msg, 1);
+        // ZCAN_Transmit(ch_handles[cmd.can_line], &tx_msg, 1);
+
+        // 5. CRITICAL: Check if it actually sent!
+        uint sent_count = ZCAN_Transmit(ch_handles[cmd.can_line], &tx_msg, 1);
+        
+        if (sent_count == 0) {
+            LOG(ERROR) << "Failed to send CAN EXT command to ID: " << cmd.can_id;
+        } else if (debug) {
+            LOG(INFO) << "Sent CAN EXT command. Count: " << sent_count;
+        }
     }
 
     void send_command(CanCommand &cmd){
-
+        // std::lock_guard<std::mutex> lock(can_mutex);
         if (ZCAN_IsDeviceOnLine(device_handle) != STATUS_ONLINE) {
             LOG(ERROR) << "Device Offline! Cannot send command to Ch" << cmd.can_line;
             return;
