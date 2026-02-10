@@ -1,0 +1,158 @@
+
+First we will test this code with controller
+
+Then use it with the main driver
+
+Keep in min -- Ak80  uses extended can id and feedback is in 298 id  --- feedback comes in 104 | 41>>8 id  or 0x29 >> 8
+In cubemars setting - I had kept Timeout to be 1 second -- thats why even after takeover the force felt huge for 1 second
+Now i reduced it to 150ms -- should change this in  car also
+
+The radar uses FMCW ie transmittion signal freq changes over time -
+    - beat frequency formed by delayed echo gives the range
+    - Doppler shift gives the velocity   -- ie you are getting relative speed
+    So both are independently measured
+Radar gives a 4D point cloud
+
+Distance resolution is 0.1m   precesion is +-0.05m
+
+Speed range +-18m/s   speed ratio 0.25m/s   precesion +- 0.12m/s
+
+operation freq is 100ms
+
+Link to datasheet - https://robu.in/wp-content/uploads/2024/11/R164169-SR75-77GHz-Technical-White-Paper.pdf
+
+
+If steering feedback is not comming the run main.cpp  and c which feedback id is being ued -- since its hardcoded right now to 2968
+
+Testing
+1. Steering
+2. Feedback from vehicle
+3. Throttle and brake
+4. Radar
+
+
+x86-c/
+├── include/                  # Shared headers & libs
+│   ├── controlcanfd.h
+│   ├── can.hpp
+│   ├── vehicle_can.hpp
+│   ├── steering_can.hpp
+│   ├── radar_can.hpp
+│   └── libcontrolcanfd.so
+├── src/
+│   ├── vehicle_interface/    # Package 1
+│   │   ├── CMakeLists.txt
+│   │   ├── package.xml
+│   │   └── vehicle_interface.cpp
+│   ├── joystick/             # Package 2 (Python)
+│   │   ├── CMakeLists.txt
+│   │   ├── package.xml
+│   │   └── joystick.py
+│   ├── ros_radar/            # Package 3
+│   │   ├── CMakeLists.txt
+│   │   ├── package.xml
+│   │   └── radar_ros.cpp
+│   └── steering/             # Package 4
+│       ├── CMakeLists.txt
+│       ├── package.xml
+│       └── main.cpp
+
+
+TO access the USB port in linux - you must create a udev rule -- by default without root privilage u cant access
+sudo nano /etc/udev/rules.d/99-canfd.rules
+
+SUBSYSTEM=="usb", ATTR{idVendor}=="04d8", ATTR{idProduct}=="0053", MODE="0666"
+
+Radar frequency is ==
+Its lower than 20Hz -- so there might be lag in radar data - shouldnt be a problem
+
+radar visualization code is same as written by muni
+
+To run the IMU package - source the package and in  /home/har/Documents/Auto_drive/steering_motor/imu_ws  -- add it to bashrc temporarily
+then run  - ros2 launch fixposition_driver_ros2 node.launch
+
+for IMU reference - https://docs.fixposition.com/fd/installation-and-usage
+https://github.com/fixposition/fixposition_driver
+
+
+in steering can driver -
+
+for(const auto& msg : all_msgs) {
+
+            if(debug) LOG(INFO) << "pile has id " << msg.id << "these are maybe extended";
+
+            if (msg.id != expected_id or ) continue;  this line was commented
+            // thats why when working with both can - steering had issue
+            // and it was saying steering fb received
+
+If we have to give 0 torque command then feedback id might also change
+- so have to collect fb from both
+
+U also need to write destructor for the Can handler - so that we dont need to unplug after stopping every time
+
+
+Make Sure the vehicle controller has Node id = 1 , change curtis can parameters accordingly
+
+
+
+
+1. RPDO 1 Configuration (Command)Command: Write 0x1400 Sub 1 (RPDO1 COB-ID) $\rightarrow$ Value 0x80000201 (Disable)Response: Timed out ("Didn't receive SDO feedback")Result: Unknown (likely ignored or failed).
+Command: Write 0x1600 Sub 0 (RPDO1 Mapping Count) $\rightarrow$ Value 0 (Disable Map)Response: ERROR 33554694Meaning: 0x06010002 = Attempt to write a read-only object.Conclusion: You cannot change the number of mapped items.
+Command: Write 0x1600 Sub 1 (Map Slot 1) $\rightarrow$ Value 0x32180010 (Throttle)Response: ERROR 1090520070Meaning: 0x06040041 = Object cannot be mapped to the PDO.Conclusion: The controller rejects mapping this specific variable (or any variable) here.
+Command: Write 0x1600 Sub 2 (Map Slot 2) $\rightarrow$ Value 0x32190010 (Brake)Response: ERROR 1090520070 (Object cannot be mapped).
+Command: Write 0x1600 Sub 0 (Map Count) $\rightarrow$ Value 2Response: ERROR 33554694 (Read Only).
+Command: Write 0x1400 Sub 1 (RPDO1 COB-ID) $\rightarrow$ Value 0x201 (Enable)Response: ERROR 33554694 (Read Only).Conclusion: You cannot change the COB-ID of RPDO1. It is fixed to 0x201 (default).
+
+2. TPDO 1 Configuration (Feedback)Command: Write 0x1800 Sub 1 (TPDO1 COB-ID) $\rightarrow$ Value 0x80000181 (Disable)Response: Success (Accepted).Note: You successfully disabled TPDO1 transmission temporarily.
+Command: Write 0x1A00 Sub 0 (TPDO1 Map Count) $\rightarrow$ Value 0Response: ERROR 33554694 (Read Only).Conclusion: Even though you disabled the PDO, the mapping table 0x1A00 is Permanently Read-Only in firmware.
+Command: Write 0x1A00 Sub 1 through Sub 4 (Map Throttle, Brake, Speed, Accel)Response: ERROR 1090520070 (Object cannot be mapped) for ALL attempts.
+Command: Write 0x1800 Sub 2 (Trans Type) $\rightarrow$ Value 0xFF (Async)Response: Success (Accepted).
+Command: Write 0x1800 Sub 5 (Event Timer) $\rightarrow$ Value 50 (ms)Response: ERROR 518Meaning: 0x06020000 = Object does not exist in the object dictionary.Conclusion: TPDO1 does not support an Event Timer on this device.
+Command: Write 0x1A00 Sub 0 (Enable Map) $\rightarrow$ Value 4Response: ERROR 33554694 (Read Only).
+
+Command: Write 0x1800 Sub 1 (TPDO1 COB-ID) $\rightarrow$ Value 0x181 (Enable)Response: Success.3. TPDO 2 Configuration (Feedback)Command: Write 0x1801 Sub 1 (TPDO2 COB-ID) $\rightarrow$ Value 0x80000281 (Disable)Response: Success.
+Command: Write 0x1A01 Sub 0 (Map Count) $\rightarrow$ Value 0Response: Success (Accepted!).Note: Unlike TPDO1, the controller allowed you to clear the count for TPDO2.
+Command: Write 0x1A01 Sub 1 (Map RPM) $\rightarrow$ Value 0x32070010Response: ERROR 33554694 (Read Only).Conclusion: While it let you clear the count, it refused to let you add a new mapping. This is inconsistent behavior by the controller but the result is the same: Mapping Failed.
+
+Command: Write 0x1A01 Sub 2, 4Response: ERROR 1090520070 (Cannot be mapped).Command: Write 0x1A01 Sub 3Response: Timed out.
+Command: Write 0x1801 Sub 5 (Event Timer) $\rightarrow$ Value 50Response: ERROR 518 (Object does not exist).
+Command: Write 0x1A01 Sub 0 (Enable Map)Response: ERROR 33554694 (Read Only).
+Command: Write 0x1801 Sub 1 (Enable TPDO2) $\rightarrow$ Value 0x281Response: Success.Summary of ErrorsRead Only (0x06010002): The Mapping Objects (0x1600, 0x1A00, 0x1A01) are locked by the firmware. You cannot change what data is in the PDOs.Object Does Not Exist (0x06020000): The Event Timer (Sub-index 5) does not exist for these PDOs. You cannot set a frequency (e.g., 50ms) using this method.Cannot Be Mapped (0x06040041): The specific variables you tried to map are not allowed in the PDOs by the manufacturer.
+
+
+
+RPDO 1 (Command You Send to Drive)
+Byte 0: 0x33D1 (Byte 0) - Likely VCL_App_Var_1 (User Defined)
+Byte 1: 0x33D1 (Byte 1)
+Byte 2: 0x3218 (Byte 0) -> VCL_Throttle Low Byte
+Byte 3: 0x3218 (Byte 1) -> VCL_Throttle High Byte
+Byte 4: 0x304E (Byte 0) -> MotorTemp_Hot (?)
+
+
+TPDO 1 (Feedback from Drive)
+Byte 0: 0x33D3 (Byte 0) - Likely VCL_App_Var_3
+Byte 1: 0x33D3 (Byte 1)
+Byte 2: 0x321C -> PD_Current (Proportional Driver Current)
+Byte 3: 0x3226 -> Switch State (Bitmask of all switches)
+Byte 4: 0x3207 (Byte 0) -> Motor_RPM Low Byte
+Byte 5: 0x3207 (Byte 1) -> Motor_RPM High Byte
+Byte 6: 0x3209 (Byte 0) -> Current_RMS Low Byte
+Byte 7: 0x3209 (Byte 1) -> Current_RMS High Byte
+
+0	134230532	0x08003204	0x3204	00	Analog 1 Input	Low Byte of Analog 1 (Pin 24)
+1	134296106	0x0801322A	0x322A	01	Controller Temp	 High Byte of Controller Internal Temp
+2	134230570	0x0800322A	0x322A	00	Controller Temp	Low Byte of Controller Internal Temp
+3	134296106	0x0801322A	0x322A	01	Controller Temp	High Byte (Repeated)
+4	134230539	0x0800320B	0x320B	00	Motor Temp	Low Byte of Motor Temperature
+5	1342966075*	0x0801320B	0x320B	01	Motor Temp	High Byte of Motor Temperature
+6	1342966087*	0x08013217	0x3217	01	Pot2 Raw	High Byte of Brake Pot (Pin 17)
+7	134296085	0x08013215	0x3215	01	Throttle Raw High Byte of Throttle Pot (Pin 16)
+
+
+
+what are you trying to do? SDO Q is becoming large -- current and rpm feedback we will get
+so we can only take that --  send throttle also through PDO and read feedback through PDO
+send brake through SDO   -- we cant read throttle feedback if its so - because in 1 loop controller can process only 1 SDO
+
+in steering can -- remove the set implementation
+Get the que implementation in can.hpp

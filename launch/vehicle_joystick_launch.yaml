@@ -1,0 +1,20 @@
+
+launch:
+
+- node:
+    pkg: "vehicle_interface"
+    exec: "vehicle_interface_node"
+    name: "vehicle1"
+    namespace: "vehicle"
+
+- node:
+    pkg: "joystick_control"
+    exec: "joystick.py"
+    name: "joy1"
+    namespace: "joystick"
+
+# - node:
+#     pkg: "driver_takeover"
+#     exec: "driver_takeover.py"
+#     name: "takeover_node1"
+#     namespace: "takeover_node"
