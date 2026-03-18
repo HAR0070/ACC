@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+
+import rospy
+from std_msgs.msg import Float32, Bool
+from custom_msgs.msg import RadarDetectionArray
+
+class RadarLeadExtractor:
+
+    def __init__(self):
+        rospy.init_node("radar_lead_extractor")
+        rospy.loginfo("Radar extractor node started")
+
+        # Parameters
+        self.lane_half_width = 1.75
+        self.max_range = 50.0
+        self.min_range = 1.5
+        self.alpha = 0.3
+
+        # Filtered relative velocity
+        self.v_rel_filt = 0.0
+
+        ### NEW: Lead tracking state
+        self.tracked_uid = None
+        self.tracked_lost_count = 0
+        self.max_lost_frames = 5   # frames before dropping lead
+
+        # Subscriber
+        rospy.Subscriber("/radar_detections",
+                         RadarDetectionArray,
+                         self.radar_callback)
+
+        # Publishers
+        self.pub_lead_dist = rospy.Publisher(
+            "/lead_distance", Float32, queue_size=10)
+
+        self.pub_lead_rel_vel = rospy.Publisher(
+            "/lead_relative_velocity", Float32, queue_size=10)
+
+        self.pub_lead_valid = rospy.Publisher(
+            "/lead_valid", Bool, queue_size=10)
+
+    def radar_callback(self, msg):
+
+        candidates = []
+
+        # ----------- Filter detections -----------
+        for det in msg.detections:
+            x = det.position.x
+            y = det.position.y
+
+            if x <= 0.0:
+                continue
+            if x < self.min_range:
+                continue
+            if abs(y) > self.lane_half_width:
+                continue
+            if det.range > self.max_range:
+                continue
+
+            candidates.append(det)
+
+        # ----------- No detections -----------
+        if not candidates:
+            self.tracked_lost_count += 1
+            if self.tracked_lost_count > self.max_lost_frames:
+                self.tracked_uid = None
+                self.pub_lead_valid.publish(False)
+            return
+
+        # ----------- Try to keep current lead -----------
+        if self.tracked_uid is not None:
+            for det in candidates:
+                if det.uid == self.tracked_uid:
+                    self.tracked_lost_count = 0
+                    self.publish_lead(det)
+                    return   # 🔑 DO NOT evaluate others
+
+            # If tracked UID missing in this frame
+            self.tracked_lost_count += 1
+
+            if self.tracked_lost_count <= self.max_lost_frames:
+                return   # 🔑 HOLD previous lead
+
+            # Lost for too long → drop it
+            self.tracked_uid = None
+
+        # ----------- Acquire new lead -----------
+        best_det = min(candidates, key=lambda d: d.position.x)
+        self.tracked_uid = best_det.uid
+        self.tracked_lost_count = 0
+        self.publish_lead(best_det)
+
+    def publish_lead(self, det):
+        d_lead = det.position.x
+        v_rel = det.velocity_mps.x
+
+        self.v_rel_filt = (
+            self.alpha * v_rel +
+            (1.0 - self.alpha) * self.v_rel_filt
+        )
+
+        self.pub_lead_dist.publish(d_lead)
+        self.pub_lead_rel_vel.publish(self.v_rel_filt)
+        self.pub_lead_valid.publish(True)
+
+        rospy.loginfo(
+            "TRACKED Lead UID=%d | d=%.2f m | v_rel=%.2f m/s",
+            det.uid, d_lead, self.v_rel_filt
+        )
+
+
+
+
+if __name__ == "__main__":
+    try:
+        RadarLeadExtractor()
+        rospy.spin()
+    except rospy.ROSInterruptException:
+        pass
+

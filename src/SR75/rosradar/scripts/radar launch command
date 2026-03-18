@@ -1,0 +1,47 @@
+Step 1 : Open Terminal and run
+asl-laptop2@asllaptop2:~/radar/src/SR75/rosradar$ sudo -E bash -c "source /opt/ros/noetic/setup.bash && source /home/asl-laptop2/radar/devel/setup.bash && rosrun rosradar radar_parse.py"
+
+
+Step 2 : Open New terminal and run
+asl-laptop2@asllaptop2:~/radar/src/SR75/rosradar$ roscore
+
+
+Step 3 : Open New terminal and run
+asl-laptop2@asllaptop2:~/radar$ source ./devel/setup.bash 
+asl-laptop2@asllaptop2:~/radar$ rosrun rosradar radar_msg_visualization.py
+
+Step 4 : Open new terminal and run
+asl-laptop2@asllaptop2:~/radar$ rosrun rviz rviz
+
+This open Rviz, here 
+1. Select Fixed frame : os_sensor_right and click add
+2. By topic >> Markerpoints.
+
+Step 5 : Open new terminal and run
+asl-laptop2@asllaptop2:~/radar$ source ./devel/setup.bash 
+asl-laptop2@asllaptop2:~/radar$ rostopic list
+asl-laptop2@asllaptop2:~/radar$ rostopic echo /radar_detections
+
+Step 6 :
+asl-laptop2@asllaptop2:~/radar$ rosrun rosradar radar_extractor.py
+
+Step 7 :
+asl-laptop2@asllaptop2:~/radar$ rosrun rosradar lead_visualizer.py 
+
+
+expected output :
+[INFO] [1770460106.503451]: Radar extractor node started and waiting for data
+[INFO] [1770460106.505566]: Radar Lead Extractor running
+[INFO] [1770460106.556648]: Lead detected | d_lead = 0.70 m | v_rel = 0.00 m/s
+
+
+
+TODO:
+
+a. create a seperate msg file
+b. update datasync file (Update readme with instructions)
+c. Check the data
+d. Integrate the IMU
+e. Create a seperate IMU msg file
+f. UPdate the data sync file
+e. Test
