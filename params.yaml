@@ -1,0 +1,12 @@
+
+pid: 
+kp : 1
+Kd : 0.1
+Ki : 0.01 
+
+model:
+thw: 3
+d0 : 2
+
+
+# Source IMU and radar packages here 
