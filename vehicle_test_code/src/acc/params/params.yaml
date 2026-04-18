@@ -1,0 +1,41 @@
+
+pid: 
+  kp : 0.3   # 0.05 , 0.002 , 0.002  - comes out good
+  kd : 0.2 # 0.05 , 0.002 , 0.002  - comes out good
+  ki : 0.002 
+  vmax: 12   #5kmph
+  nominal: 0.25
+
+model:
+  thw: 1.5
+  d0 : 1
+
+imu: true
+debug: true
+
+time:
+  DT: 0.1  
+
+# This is basic parameters for ACC state space matrix
+acc:
+    t1: 0.2
+    k1: 1.2       # Steady state of 1st order step input
+    a_max: 1.2   #m/s
+    a_min: -1
+    del_a_max: 0.1
+
+brake:
+    k2: 2  #0.9       # Steady state of 1st order step input
+    t2: 0.2          # time constant of  "" ""
+    b_max: 2 #m/s
+    b_min: -1
+    del_b_max: 0.1
+
+weights:
+    q1: 0.8     
+    q2: 0.5   
+    q3: 0.1    
+    
+    r_brake: 25  
+    r_accel: 10 
+

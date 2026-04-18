@@ -1,0 +1,7 @@
+<launch>
+    <rosparam command="load" file="$(find acc)/params/params.yaml" ns="acc_node" />
+    
+    <node pkg="acc" type="acc_node" name="acc_node" output="screen" />
+    
+    <node pkg="acc" type="simulator.py" name="vehicle_simulator" output="screen" />
+</launch>

@@ -1,0 +1,7 @@
+<launch>
+    <node pkg="acc" type="acc_node" name="acc_node" output="screen">
+        
+        <rosparam command="load" file="$(find acc)/params/params.yaml" />
+        
+    </node>
+</launch>	
