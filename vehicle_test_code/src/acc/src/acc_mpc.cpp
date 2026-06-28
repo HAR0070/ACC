@@ -381,6 +381,8 @@ int main(int argc, char **argv) {
                 control_action = std::max(std::min(control_action, 0.0f), -0.5f);   
             }
 
+            current_states.update_u(control_action);
+
             // Deadband & clamp
             if (control_action > 0.02f) {
                 final_cont_act = std::min(control_action, nominal_cmd);  
@@ -392,12 +394,10 @@ int main(int argc, char **argv) {
 
             if (debug) {
                 std::cout << "ACC MODE. dr: " << dr << " vh: " << vh << " err: " << error << " Act: " << final_cont_act << std::endl;
-            }
         }
 
         // --- PUBLISH AND LOG ---
         throttle_msg.data = final_cont_act;
-        current_states.update_u(final_cont_act);
         throttle_pub.publish(throttle_msg);
 
         state_msg.data = {current_states.dr, current_states.vr, current_states.vh, 
